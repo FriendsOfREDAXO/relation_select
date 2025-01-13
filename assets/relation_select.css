@@ -1,0 +1,17 @@
+.relation-select-wrapper {
+    position: relative;
+}
+
+.relation-select-wrapper .choices__list--multiple .choices__item {
+    background-color: #4b9ad9;
+    border: 1px solid #4b9ad9;
+    cursor: move;
+}
+
+.relation-select-wrapper .choices__inner {
+    min-height: 40px;
+}
+
+.relation-select-wrapper .choices__list--dropdown {
+    z-index: 100;
+}
