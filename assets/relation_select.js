@@ -40,9 +40,19 @@ $(document).on('rex:ready', function() {
 
                 if (config.sortable !== false) {
                     setTimeout(() => {
-                        new Sortable(wrapper.querySelector('.choices__list--multiple'), {
+                        let isDragging = false;
+                        const sortable = new Sortable(wrapper.querySelector('.choices__list--multiple'), {
                             draggable: '.choices__item',
+                            onStart: () => {
+                                isDragging = true;
+                                wrapper.querySelector('.choices').classList.add('sorting');
+                            },
                             onEnd: function() {
+                                setTimeout(() => {
+                                    isDragging = false;
+                                    wrapper.querySelector('.choices').classList.remove('sorting');
+                                }, 50);
+                                
                                 const values = [];
                                 wrapper.querySelectorAll('.choices__item').forEach(item => {
                                     const value = item.getAttribute('data-value');
@@ -51,6 +61,13 @@ $(document).on('rex:ready', function() {
                                 input.value = values.join(',');
                             }
                         });
+
+                        wrapper.addEventListener('click', (e) => {
+                            if (isDragging && e.target.closest('.choices__item')) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                            }
+                        }, true);
                     }, 100);
                 }
             });
