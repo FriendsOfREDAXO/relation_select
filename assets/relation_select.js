@@ -3,68 +3,47 @@ $(document).on('rex:ready', function() {
         const input = this;
         const config = JSON.parse(input.dataset.relationConfig || '{}');
         
-        const wrapper = document.createElement('div');
-        wrapper.className = 'relation-select-wrapper';
-        input.parentNode.insertBefore(wrapper, input);
-        
         const select = document.createElement('select');
         select.multiple = config.multiple !== false;
-        wrapper.appendChild(select);
-        wrapper.appendChild(input);
+        input.parentNode.insertBefore(select, input);
         input.style.display = 'none';
         
-        const choices = new Choices(select, {
-            removeItemButton: true,
-            duplicateItemsAllowed: false,
-            placeholder: true,
-            placeholderValue: config.placeholder || 'Bitte wählen...',
-            searchPlaceholderValue: 'Suchen...',
-            itemSelectText: '',
-            shouldSort: false
-        });
-
-        function updateInputValue() {
-            const values = [];
-            wrapper.querySelectorAll('.choices__list--multiple .choices__item').forEach(item => {
-                const value = item.getAttribute('data-value');
-                if (value) values.push(value);
-            });
-            input.value = values.join(',');
-        }
-
-        select.addEventListener('change', updateInputValue);
-
-        fetch(`index.php?rex-api-call=relation_select&table=${config.table}&value_field=${config.valueField}&label_field=${config.labelField}`)
-            .then(response => response.json())
-            .then(data => {
-                const currentValues = input.value.split(',').filter(v => v);
-                choices.setChoices(data.map(item => ({
-                    value: item.value,
-                    label: item.label,
-                    selected: currentValues.includes(item.value.toString())
-                })));
-
-                if (config.sortable !== false) {
-                    let isSorting = false;
-                    new Sortable(wrapper.querySelector('.choices__list--multiple'), {
-                        draggable: '.choices__item',
-                        onStart: () => {
-                            isSorting = true;
-                        },
-                        onEnd: () => {
-                            setTimeout(() => {
-                                isSorting = false;
-                            }, 100);
-                            updateInputValue();
-                        }
+        new TomSelect(select, {
+            valueField: 'value',
+            labelField: 'label',
+            searchField: 'label',
+            plugins: ['remove_button', 'drag_drop'],
+            placeholder: config.placeholder || 'Bitte wählen...',
+            load: function(query, callback) {
+                fetch(`index.php?rex-api-call=relation_select&table=${config.table}&value_field=${config.valueField}&label_field=${config.labelField}`)
+                    .then(response => response.json())
+                    .then(json => {
+                        callback(json);
+                    }).catch(() => {
+                        callback();
                     });
-
-                    wrapper.querySelector('.choices__list--multiple').addEventListener('mousedown', (e) => {
-                        if (isSorting) {
-                            e.stopPropagation();
-                        }
-                    }, true);
+            },
+            onChange: function() {
+                input.value = this.getValue().join(',');
+            },
+            onInitialize: function() {
+                const self = this;
+                const values = input.value.split(',').filter(v => v);
+                if (values.length) {
+                    self.load(function(callback) {
+                        fetch(`index.php?rex-api-call=relation_select&table=${config.table}&value_field=${config.valueField}&label_field=${config.labelField}`)
+                            .then(response => response.json())
+                            .then(json => {
+                                values.forEach(value => {
+                                    const item = json.find(i => i.value.toString() === value);
+                                    if (item) self.addOption(item);
+                                });
+                                values.forEach(value => self.addItem(value));
+                                callback();
+                            });
+                    });
                 }
-            });
+            }
+        });
     });
 });
