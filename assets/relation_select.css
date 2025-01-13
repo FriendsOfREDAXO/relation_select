@@ -15,3 +15,7 @@
 .relation-select-wrapper .choices__list--dropdown {
     z-index: 100;
 }
+
+.relation-select-wrapper .choices.sorting .choices__list--dropdown {
+    display: none !important;
+}
