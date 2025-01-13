@@ -1,18 +1,34 @@
 # Relation Select AddOn
 
-Ermöglicht die Auswahl verknüpfter Datensätze mit Tom Select.
+Auswahl verknüpfter Datensätze mit Choices.js und Sortierung.
 
 ## Nutzung
 
-```html
-<input type="text" name="my_field" value="1,4,7" 
-    data-relation-config="{'table':'rex_categories','valueField':'id','labelField':'name','sortable':true,'multiple':true,'placeholder':'Bitte wählen...'}">
+### Als Metainfo-Feld
+```
+data-relation-config="{'table':'rex_categories','valueField':'id','labelField':'name','sortable':true,'multiple':true}"
 ```
 
-## Optionen
+### Als HTML
+```html
+<input type="text" name="my_field" 
+    data-relation-config="{'table':'rex_categories','valueField':'id','labelField':'name','sortable':true,'multiple':true,'placeholder':'Bitte wählen...'}"
+>
+```
 
-- table: Name der REDAXO Tabelle
-- valueField: Spalte für den Wert
-- labelField: Spalte für die Anzeige
+### Als YForm-Feld
+```php
+$yform->setValueField('text', [
+    'name' => 'categories',
+    'label' => 'Kategorien',
+    'attributes' => 'data-relation-config="{'table':'rex_categories','valueField':'id','labelField':'name','sortable':true,'multiple':true}"'
+]);
+```
+
+## Parameter
+- table: Tabelle (z.B. rex_categories)
+- valueField: Feld für den Wert (z.B. id)
+- labelField: Feld für die Anzeige (z.B. name) 
+- sortable: Sortierung aktivieren (true/false)
 - multiple: Mehrfachauswahl (true/false)
 - placeholder: Platzhaltertext
