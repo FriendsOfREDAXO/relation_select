@@ -20,11 +20,13 @@ $(document).on('rex:ready', function() {
             placeholderValue: config.placeholder || 'Bitte wählen...',
             searchPlaceholderValue: 'Suchen...',
             itemSelectText: '',
-            shouldSort: false,
-            classNames: {
-                containerOuter: 'choices choices-outer'
-            }
+            shouldSort: false
         });
+        
+        // Deaktiviere alle Choices-Events auf der Multiple List
+        const listElement = wrapper.querySelector('.choices__list--multiple');
+        const clone = listElement.cloneNode(true);
+        listElement.parentNode.replaceChild(clone, listElement);
 
         select.addEventListener('change', function() {
             const values = Array.from(choices.getValue()).map(choice => choice.value);
@@ -44,25 +46,13 @@ $(document).on('rex:ready', function() {
                 if (config.sortable !== false) {
                     new Sortable(wrapper.querySelector('.choices__list--multiple'), {
                         draggable: '.choices__item',
-                        handle: '.choices__item',
-                        onStart: () => {
-                            wrapper.querySelector('.choices-outer').classList.add('sorting');
-                        },
                         onEnd: function() {
-                            wrapper.querySelector('.choices-outer').classList.remove('sorting');
                             const values = [];
                             wrapper.querySelectorAll('.choices__item').forEach(item => {
                                 const value = item.getAttribute('data-value');
                                 if (value) values.push(value);
                             });
                             input.value = values.join(',');
-                        }
-                    });
-
-                    // Prevent choice selection when sorting
-                    wrapper.querySelector('.choices__list--multiple').addEventListener('mousedown', (e) => {
-                        if (e.target.closest('.choices__item')) {
-                            e.preventDefault();
                         }
                     });
                 }
