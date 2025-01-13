@@ -8,7 +8,7 @@ $(document).on('rex:ready', function() {
         input.parentNode.insertBefore(select, input);
         input.style.display = 'none';
         
-        new TomSelect(select, {
+        const ts = new TomSelect(select, {
             valueField: 'value',
             labelField: 'label',
             searchField: 'label',
@@ -22,9 +22,6 @@ $(document).on('rex:ready', function() {
                     }).catch(() => {
                         callback();
                     });
-            },
-            onChange: function() {
-                input.value = this.getValue().join(',');
             },
             onInitialize: function() {
                 const self = this;
@@ -44,6 +41,12 @@ $(document).on('rex:ready', function() {
                     });
                 }
             }
+        });
+
+        // Event Handler für Änderungen
+        select.addEventListener('change', function() {
+            const values = ts.getValue();
+            input.value = Array.isArray(values) ? values.join(',') : values;
         });
     });
 });
