@@ -1,36 +1,8 @@
-.relation-select-wrapper {
-    position: relative;
+.ss-main {
+    margin-bottom: 5px;
 }
 
-.relation-select-wrapper .choices__list--multiple .choices__item {
+.ss-main .ss-values .ss-value {
     background-color: #4b9ad9;
     border: 1px solid #4b9ad9;
-    cursor: grab;
-    padding-right: 30px;
-}
-
-.relation-select-wrapper .choices__list--multiple .choices__item:active {
-    cursor: grabbing;
-}
-
-.relation-select-wrapper .choices__inner {
-    min-height: 40px;
-    padding: 4px;
-}
-
-.relation-select-wrapper .choices__list--dropdown {
-    z-index: 100;
-}
-
-.relation-select-wrapper.sorting .choices__list--dropdown,
-.relation-select-wrapper.sorting .choices__input--cloned {
-    display: none !important;
-}
-
-.relation-select-wrapper .choices__list--multiple .choices__item .choices__button {
-    border-left: 1px solid #fff;
-    position: absolute;
-    right: 0;
-    padding-left: 8px;
-    margin: 0;
 }
