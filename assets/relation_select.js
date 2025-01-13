@@ -1,46 +1,126 @@
 $(document).on('rex:ready', function() {
+    // Cleanup old instances
+    $('.relation-select-widget').remove();
+
     $('input[data-relation-config]').each(function() {
         const input = this;
-        if (input._select) {
-            input._select.destroy();
-            delete input._select;
-        }
-        
         const config = JSON.parse(input.dataset.relationConfig || '{}');
-        const select = document.createElement('select');
-        select.multiple = config.multiple !== false;
-        input.parentNode.insertBefore(select, input);
-        input.style.display = 'none';
+        
+        // Create widget structure
+        const widget = $(`
+            <div class="relation-select-widget">
+                <div class="relation-select-available">
+                    <input type="text" class="form-control relation-select-search" placeholder="Suchen...">
+                    <ul class="relation-select-list available-list"></ul>
+                </div>
+                <div class="relation-select-selected">
+                    <div class="relation-select-header">Ausgewählte Einträge</div>
+                    <ul class="relation-select-list selected-list"></ul>
+                </div>
+            </div>
+        `);
 
+        $(input).hide().after(widget);
+
+        // Load data
         fetch(`index.php?rex-api-call=relation_select&table=${config.table}&value_field=${config.valueField}&label_field=${config.labelField}`)
             .then(response => response.json())
             .then(data => {
-                const currentValues = input.value.split(',').filter(v => v);
-                const ss = new SlimSelect({
-                    select: select,
-                    settings: {
-                        allowDeselect: true,
-                        placeholderText: config.placeholder || 'Bitte wählen...',
-                        searchPlaceholder: 'Suchen...',
-                        enableOrder: true
-                    },
-                    data: data.map(item => ({
-                        value: item.value,
-                        text: item.label,
-                        selected: currentValues.includes(item.value.toString())
-                    })),
-                    events: {
-                        afterChange: (values) => {
-                            input.value = values.map(v => v.value).join(',');
-                            $(input).trigger('change');
-                        },
-                        afterOrder: (values) => {
-                            input.value = values.map(v => v.value).join(',');
-                            $(input).trigger('change');
-                        }
+                const selectedValues = input.value.split(',').filter(v => v);
+                const availableList = widget.find('.available-list');
+                const selectedList = widget.find('.selected-list');
+                
+                // Fill available items
+                data.forEach(item => {
+                    if (!selectedValues.includes(item.value.toString())) {
+                        availableList.append(`
+                            <li data-value="${item.value}">
+                                <span class="title">${item.label}</span>
+                                <button type="button" class="btn btn-link add-item">
+                                    <i class="fa fa-plus"></i>
+                                </button>
+                            </li>
+                        `);
                     }
                 });
-                input._select = ss;
+
+                // Fill selected items
+                selectedValues.forEach(value => {
+                    const item = data.find(i => i.value.toString() === value);
+                    if (item) {
+                        selectedList.append(`
+                            <li data-value="${item.value}">
+                                <i class="fa fa-bars handle"></i>
+                                <span class="title">${item.label}</span>
+                                <button type="button" class="btn btn-link remove-item">
+                                    <i class="fa fa-minus"></i>
+                                </button>
+                            </li>
+                        `);
+                    }
+                });
+
+                // Make selected list sortable
+                new Sortable(selectedList[0], {
+                    handle: '.handle',
+                    animation: 150,
+                    onSort: () => updateValue()
+                });
+
+                // Search functionality
+                widget.find('.relation-select-search').on('input', function() {
+                    const search = this.value.toLowerCase();
+                    availableList.find('li').each(function() {
+                        const text = $(this).find('.title').text().toLowerCase();
+                        $(this).toggle(text.includes(search));
+                    });
+                });
+
+                // Add item
+                widget.on('click', '.add-item', function() {
+                    const li = $(this).closest('li');
+                    const value = li.data('value');
+                    const title = li.find('.title').text();
+                    
+                    selectedList.append(`
+                        <li data-value="${value}">
+                            <i class="fa fa-bars handle"></i>
+                            <span class="title">${title}</span>
+                            <button type="button" class="btn btn-link remove-item">
+                                <i class="fa fa-minus"></i>
+                            </button>
+                        </li>
+                    `);
+                    li.remove();
+                    updateValue();
+                });
+
+                // Remove item
+                widget.on('click', '.remove-item', function() {
+                    const li = $(this).closest('li');
+                    const value = li.data('value');
+                    const title = li.find('.title').text();
+                    
+                    availableList.append(`
+                        <li data-value="${value}">
+                            <span class="title">${title}</span>
+                            <button type="button" class="btn btn-link add-item">
+                                <i class="fa fa-plus"></i>
+                            </button>
+                        </li>
+                    `);
+                    li.remove();
+                    updateValue();
+                });
+
+                function updateValue() {
+                    const values = [];
+                    selectedList.find('li').each(function() {
+                        values.push($(this).data('value'));
+                    });
+                    input.value = values.join(',');
+                    $(input).trigger('change');
+                }
             });
     });
 });
