@@ -1,18 +1,18 @@
 # Relation Select AddOn
 
-Auswahl verknüpfter Datensätze mit Choices.js und Sortierung.
+Auswahl verknüpfter Datensätze mit SlimSelect.
 
 ## Nutzung
 
 ### Als Metainfo-Feld
 ```
-data-relation-config="{'table':'rex_categories','valueField':'id','labelField':'name','sortable':true,'multiple':true}"
+data-relation-config="{'table':'rex_categories','valueField':'id','labelField':'name','multiple':true}"|
 ```
 
 ### Als HTML
 ```html
 <input type="text" name="my_field" 
-    data-relation-config="{'table':'rex_categories','valueField':'id','labelField':'name','sortable':true,'multiple':true,'placeholder':'Bitte wählen...'}"
+    data-relation-config="{'table':'rex_categories','valueField':'id','labelField':'name','multiple':true,'placeholder':'Bitte wählen...'}"
 >
 ```
 
@@ -21,7 +21,7 @@ data-relation-config="{'table':'rex_categories','valueField':'id','labelField':'
 $yform->setValueField('text', [
     'name' => 'categories',
     'label' => 'Kategorien',
-    'attributes' => 'data-relation-config="{'table':'rex_categories','valueField':'id','labelField':'name','sortable':true,'multiple':true}"'
+    'attributes' => 'data-relation-config="{'table':'rex_categories','valueField':'id','labelField':'name','multiple':true}"'
 ]);
 ```
 
@@ -29,6 +29,5 @@ $yform->setValueField('text', [
 - table: Tabelle (z.B. rex_categories)
 - valueField: Feld für den Wert (z.B. id)
 - labelField: Feld für die Anzeige (z.B. name) 
-- sortable: Sortierung aktivieren (true/false)
 - multiple: Mehrfachauswahl (true/false)
 - placeholder: Platzhaltertext
