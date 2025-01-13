@@ -20,13 +20,12 @@ $(document).on('rex:ready', function() {
             placeholderValue: config.placeholder || 'Bitte wählen...',
             searchPlaceholderValue: 'Suchen...',
             itemSelectText: '',
-            shouldSort: config.sortable !== false
+            shouldSort: false // Wichtig: choices.js Sortierung deaktivieren
         });
 
         select.addEventListener('change', function() {
-            input.value = Array.from(choices.getValue())
-                .map(choice => choice.value)
-                .join(',');
+            const values = Array.from(choices.getValue()).map(choice => choice.value);
+            input.value = values.join(',');
         });
 
         fetch(`index.php?rex-api-call=relation_select&table=${config.table}&value_field=${config.valueField}&label_field=${config.labelField}`)
@@ -40,16 +39,27 @@ $(document).on('rex:ready', function() {
                 })));
 
                 if (config.sortable !== false) {
-                    new Sortable(wrapper.querySelector('.choices__list--multiple'), {
-                        draggable: '.choices__item',
-                        onEnd: function() {
-                            const values = [];
-                            wrapper.querySelectorAll('.choices__list--multiple .choices__item').forEach(item => {
-                                values.push(item.dataset.value);
-                            });
-                            input.value = values.join(',');
-                        }
-                    });
+                    // Sortable erst nach dem Laden der Choices initialisieren
+                    setTimeout(() => {
+                        new Sortable(wrapper.querySelector('.choices__list--multiple'), {
+                            draggable: '.choices__item--selectable',
+                            onEnd: function() {
+                                const values = [];
+                                wrapper.querySelectorAll('.choices__item--selectable').forEach(item => {
+                                    values.push(item.dataset.value);
+                                });
+                                input.value = values.join(',');
+                                // Choices aktualisieren
+                                choices.clearStore();
+                                values.forEach(value => {
+                                    const item = data.find(i => i.value.toString() === value);
+                                    if (item) {
+                                        choices.addItem(item.label, item.value);
+                                    }
+                                });
+                            }
+                        });
+                    }, 100);
                 }
             });
     });
