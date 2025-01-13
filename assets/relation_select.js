@@ -20,7 +20,10 @@ $(document).on('rex:ready', function() {
             placeholderValue: config.placeholder || 'Bitte wählen...',
             searchPlaceholderValue: 'Suchen...',
             itemSelectText: '',
-            shouldSort: false
+            shouldSort: false,
+            classNames: {
+                containerOuter: 'choices choices-outer'
+            }
         });
 
         select.addEventListener('change', function() {
@@ -39,36 +42,29 @@ $(document).on('rex:ready', function() {
                 })));
 
                 if (config.sortable !== false) {
-                    setTimeout(() => {
-                        let isDragging = false;
-                        const sortable = new Sortable(wrapper.querySelector('.choices__list--multiple'), {
-                            draggable: '.choices__item',
-                            onStart: () => {
-                                isDragging = true;
-                                wrapper.querySelector('.choices').classList.add('sorting');
-                            },
-                            onEnd: function() {
-                                setTimeout(() => {
-                                    isDragging = false;
-                                    wrapper.querySelector('.choices').classList.remove('sorting');
-                                }, 50);
-                                
-                                const values = [];
-                                wrapper.querySelectorAll('.choices__item').forEach(item => {
-                                    const value = item.getAttribute('data-value');
-                                    if (value) values.push(value);
-                                });
-                                input.value = values.join(',');
-                            }
-                        });
+                    new Sortable(wrapper.querySelector('.choices__list--multiple'), {
+                        draggable: '.choices__item',
+                        handle: '.choices__item',
+                        onStart: () => {
+                            wrapper.querySelector('.choices-outer').classList.add('sorting');
+                        },
+                        onEnd: function() {
+                            wrapper.querySelector('.choices-outer').classList.remove('sorting');
+                            const values = [];
+                            wrapper.querySelectorAll('.choices__item').forEach(item => {
+                                const value = item.getAttribute('data-value');
+                                if (value) values.push(value);
+                            });
+                            input.value = values.join(',');
+                        }
+                    });
 
-                        wrapper.addEventListener('click', (e) => {
-                            if (isDragging && e.target.closest('.choices__item')) {
-                                e.preventDefault();
-                                e.stopPropagation();
-                            }
-                        }, true);
-                    }, 100);
+                    // Prevent choice selection when sorting
+                    wrapper.querySelector('.choices__list--multiple').addEventListener('mousedown', (e) => {
+                        if (e.target.closest('.choices__item')) {
+                            e.preventDefault();
+                        }
+                    });
                 }
             });
     });
