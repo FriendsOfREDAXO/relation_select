@@ -21,7 +21,8 @@ $(document).on('rex:ready', function() {
                     settings: {
                         allowDeselect: true,
                         placeholderText: config.placeholder || 'Bitte wählen...',
-                        searchPlaceholder: 'Suchen...'
+                        searchPlaceholder: 'Suchen...',
+                        enableOrder: true
                     },
                     data: data.map(item => ({
                         value: item.value,
@@ -30,6 +31,10 @@ $(document).on('rex:ready', function() {
                     })),
                     events: {
                         afterChange: (values) => {
+                            input.value = values.map(v => v.value).join(',');
+                            $(input).trigger('change');
+                        },
+                        afterOrder: (values) => {
                             input.value = values.map(v => v.value).join(',');
                             $(input).trigger('change');
                         }
