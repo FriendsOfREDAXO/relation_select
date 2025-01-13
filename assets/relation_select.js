@@ -22,16 +22,17 @@ $(document).on('rex:ready', function() {
             itemSelectText: '',
             shouldSort: false
         });
-        
-        // Deaktiviere alle Choices-Events auf der Multiple List
-        const listElement = wrapper.querySelector('.choices__list--multiple');
-        const clone = listElement.cloneNode(true);
-        listElement.parentNode.replaceChild(clone, listElement);
 
-        select.addEventListener('change', function() {
-            const values = Array.from(choices.getValue()).map(choice => choice.value);
+        function updateInputValue() {
+            const values = [];
+            wrapper.querySelectorAll('.choices__list--multiple .choices__item').forEach(item => {
+                const value = item.getAttribute('data-value');
+                if (value) values.push(value);
+            });
             input.value = values.join(',');
-        });
+        }
+
+        select.addEventListener('change', updateInputValue);
 
         fetch(`index.php?rex-api-call=relation_select&table=${config.table}&value_field=${config.valueField}&label_field=${config.labelField}`)
             .then(response => response.json())
@@ -44,17 +45,25 @@ $(document).on('rex:ready', function() {
                 })));
 
                 if (config.sortable !== false) {
+                    let isSorting = false;
                     new Sortable(wrapper.querySelector('.choices__list--multiple'), {
                         draggable: '.choices__item',
-                        onEnd: function() {
-                            const values = [];
-                            wrapper.querySelectorAll('.choices__item').forEach(item => {
-                                const value = item.getAttribute('data-value');
-                                if (value) values.push(value);
-                            });
-                            input.value = values.join(',');
+                        onStart: () => {
+                            isSorting = true;
+                        },
+                        onEnd: () => {
+                            setTimeout(() => {
+                                isSorting = false;
+                            }, 100);
+                            updateInputValue();
                         }
                     });
+
+                    wrapper.querySelector('.choices__list--multiple').addEventListener('mousedown', (e) => {
+                        if (isSorting) {
+                            e.stopPropagation();
+                        }
+                    }, true);
                 }
             });
     });
