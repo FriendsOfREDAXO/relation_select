@@ -1,18 +1,18 @@
 # Relation Select AddOn
 
-Auswahl verknüpfter Datensätze mit SlimSelect.
+Ermöglicht die Auswahl und Sortierung verknüpfter Datensätze.
 
 ## Nutzung
 
 ### Als Metainfo-Feld
 ```
-data-relation-config="{'table':'rex_categories','valueField':'id','labelField':'name','multiple':true}"|
+data-relation-config="{'table':'rex_categories','valueField':'id','labelField':'name'}"
 ```
 
 ### Als HTML
 ```html
 <input type="text" name="my_field" 
-    data-relation-config="{'table':'rex_categories','valueField':'id','labelField':'name','multiple':true,'placeholder':'Bitte wählen...'}"
+    data-relation-config="{'table':'rex_categories','valueField':'id','labelField':'name'}"
 >
 ```
 
@@ -21,13 +21,11 @@ data-relation-config="{'table':'rex_categories','valueField':'id','labelField':'
 $yform->setValueField('text', [
     'name' => 'categories',
     'label' => 'Kategorien',
-    'attributes' => 'data-relation-config="{'table':'rex_categories','valueField':'id','labelField':'name','multiple':true}"'
+    'attributes' => 'data-relation-config="{'table':'rex_categories','valueField':'id','labelField':'name'}"'
 ]);
 ```
 
 ## Parameter
-- table: Tabelle (z.B. rex_categories)
-- valueField: Feld für den Wert (z.B. id)
-- labelField: Feld für die Anzeige (z.B. name) 
-- multiple: Mehrfachauswahl (true/false)
-- placeholder: Platzhaltertext
+- table: Name der REDAXO-Tabelle
+- valueField: Feld für den Wert
+- labelField: Feld für die Anzeige
