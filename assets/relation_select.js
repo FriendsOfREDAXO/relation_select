@@ -1,13 +1,15 @@
 $(document).on('rex:ready', function() {
-    // Destroy existing instances
     $('input[data-relation-config]').each(function() {
-        const select = this.previousElementSibling;
-        if (select && select._choices) {
-            select._choices.destroy();
+        const input = this;
+        if (input._relationSelect) {
+            const select = input.previousElementSibling;
+            if (select && select._choices) {
+                select._choices.destroy();
+            }
+            delete input._relationSelect;
         }
     });
 
-    // Initialize new instances
     $('input[data-relation-config]').each(function() {
         const input = this;
         const config = JSON.parse(input.dataset.relationConfig || '{}');
@@ -29,10 +31,13 @@ $(document).on('rex:ready', function() {
             placeholderValue: config.placeholder || 'Bitte wählen...',
             searchPlaceholderValue: 'Suchen...',
             itemSelectText: '',
-            shouldSort: false
+            shouldSort: false,
+            allowHTML: true,
+            removeItems: true
         });
 
-        // Load options via AJAX
+        input._relationSelect = true;
+
         fetch(`index.php?rex-api-call=relation_select&table=${config.table}&value_field=${config.valueField}&label_field=${config.labelField}`)
             .then(response => response.json())
             .then(data => {
@@ -43,29 +48,33 @@ $(document).on('rex:ready', function() {
                     selected: currentValues.includes(item.value.toString())
                 })));
 
-                // Initialize Sortable after Choices is loaded
-                if (config.sortable !== false) {
-                    const sortable = new Sortable(wrapper.querySelector('.choices__list--multiple'), {
+                const list = wrapper.querySelector('.choices__list--multiple');
+                
+                if (config.sortable !== false && list) {
+                    new Sortable(list, {
+                        animation: 150,
                         draggable: '.choices__item',
+                        handle: '.choices__item',
                         onStart: () => {
                             wrapper.classList.add('sorting');
                         },
-                        onEnd: () => {
+                        onEnd: (evt) => {
                             wrapper.classList.remove('sorting');
-                            const values = [];
-                            wrapper.querySelectorAll('.choices__item').forEach(item => {
-                                const value = item.getAttribute('data-value');
-                                if (value) values.push(value);
-                            });
-                            input.value = values.join(',');
-                            $(input).trigger('change');
+                            if (evt.oldIndex !== evt.newIndex) {
+                                const values = [];
+                                list.querySelectorAll('.choices__item').forEach(item => {
+                                    const value = item.dataset.value;
+                                    if (value) values.push(value);
+                                });
+                                input.value = values.join(',');
+                                $(input).trigger('change');
+                            }
                         }
                     });
                 }
             });
 
-        // Update hidden input when selection changes
-        select.addEventListener('change', function() {
+        choices.passedElement.element.addEventListener('change', function() {
             if (!wrapper.classList.contains('sorting')) {
                 const values = choices.getValue(true);
                 input.value = values.join(',');
@@ -73,7 +82,6 @@ $(document).on('rex:ready', function() {
             }
         });
 
-        // Prevent dropdown from opening when sorting
         wrapper.addEventListener('mousedown', function(e) {
             if (e.target.closest('.choices__list--multiple')) {
                 e.stopPropagation();
