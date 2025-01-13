@@ -20,7 +20,7 @@ $(document).on('rex:ready', function() {
             placeholderValue: config.placeholder || 'Bitte wählen...',
             searchPlaceholderValue: 'Suchen...',
             itemSelectText: '',
-            shouldSort: false // Wichtig: choices.js Sortierung deaktivieren
+            shouldSort: false
         });
 
         select.addEventListener('change', function() {
@@ -39,24 +39,16 @@ $(document).on('rex:ready', function() {
                 })));
 
                 if (config.sortable !== false) {
-                    // Sortable erst nach dem Laden der Choices initialisieren
                     setTimeout(() => {
                         new Sortable(wrapper.querySelector('.choices__list--multiple'), {
-                            draggable: '.choices__item--selectable',
+                            draggable: '.choices__item',
                             onEnd: function() {
                                 const values = [];
-                                wrapper.querySelectorAll('.choices__item--selectable').forEach(item => {
-                                    values.push(item.dataset.value);
+                                wrapper.querySelectorAll('.choices__item').forEach(item => {
+                                    const value = item.getAttribute('data-value');
+                                    if (value) values.push(value);
                                 });
                                 input.value = values.join(',');
-                                // Choices aktualisieren
-                                choices.clearStore();
-                                values.forEach(value => {
-                                    const item = data.find(i => i.value.toString() === value);
-                                    if (item) {
-                                        choices.addItem(item.label, item.value);
-                                    }
-                                });
                             }
                         });
                     }, 100);
