@@ -1,26 +1,20 @@
-.relation-select-wrapper {
-    position: relative;
+.ts-wrapper .ts-control > div {
+    background: #4b9ad9;
+    color: #fff;
+    border: none;
 }
 
-.relation-select-wrapper .choices__list--multiple .choices__item {
-    background-color: #4b9ad9;
-    border: 1px solid #4b9ad9;
-    cursor: move;
+.ts-wrapper.multi .ts-control > div.active {
+    background: #4b9ad9;
+    color: #fff;
 }
 
-.relation-select-wrapper .choices__inner {
+.ts-wrapper .ts-control {
     min-height: 40px;
+    padding: 4px;
 }
 
-.relation-select-wrapper .choices__list--dropdown {
-    z-index: 100;
-}
-
-.relation-select-wrapper .choices.sorting .choices__list--multiple {
-    cursor: move;
-}
-
-.relation-select-wrapper .choices.sorting .choices__list--dropdown {
-    display: none !important;
-    pointer-events: none;
+.ts-wrapper.plugin-drag_drop .ts-control div.drag-drop-hover {
+    box-shadow: none;
+    background: #3d8bc5;
 }
