@@ -6,7 +6,7 @@ Ermöglicht die Auswahl und Sortierung verknüpfter Datensätze.
 
 ### Als Metainfo-Feld
 ```
-data-relation-config="{'table':'rex_categories','valueField':'id','labelField':'name'}"
+data-relation-mode="modal" data-relation-config='{"table":"rex_article","valueField":"id","labelField":"name"}'
 ```
 
 ### Als HTML
