@@ -20,38 +20,38 @@ class rex_api_relation_select extends rex_api_function
         // Parse label fields and separators
         $parts = array_map('trim', explode('|', $labelField));
         $labelExpr = [];
+
+        rex_logger::logError(1, 'Label parts: ' . print_r($parts, true));
+        
         foreach ($parts as $part) {
             if ($part === '') {
-                // Empty part becomes space
-                $labelExpr[] = "' '";
                 continue;
             }
             
-            // Check for #string# syntax mixed with field names
-            preg_match_all('/#([^#]+)#|\b([^#\s]+)\b/', $part, $matches);
-            foreach ($matches[0] as $match) {
-                if (substr($match, 0, 1) === '#' && substr($match, -1) === '#') {
-                    // It's a literal string
-                    $string = substr($match, 1, -1);
-                    $labelExpr[] = "'" . $sql->escape($string) . "'";
-                } else {
-                    // It's a field
-                    $labelExpr[] = $sql->escapeIdentifier($match);
-                }
+            // Handle [[text]] parts and field names separately
+            if (preg_match('/^\[\[(.+?)\]\]$/', $part, $matches)) {
+                // It's a literal string
+                $string = $matches[1];
+                $labelExpr[] = "'" . $sql->escape($string) . "'";
+                rex_logger::logError(1, 'Added literal: ' . $string);
+            } else {
+                // It's a field
+                $labelExpr[] = $sql->escapeIdentifier($part);
+                rex_logger::logError(1, 'Added field: ' . $part);
             }
         }
 
-        // If no separator was given between parts, add space
+        // Add spaces between expressions
         $finalExpr = [];
         for ($i = 0; $i < count($labelExpr); $i++) {
             $finalExpr[] = $labelExpr[$i];
-            // Add space between fields if next element exists and no literal string follows
-            if ($i < count($labelExpr) - 1 && !str_contains($labelExpr[$i], "'") && !str_contains($labelExpr[$i + 1], "'")) {
+            if ($i < count($labelExpr) - 1) {
                 $finalExpr[] = "' '";
             }
         }
 
         $labelExpr = "CONCAT(" . implode(', ', $finalExpr) . ") as label";
+        rex_logger::logError(1, 'Final label expression: ' . $labelExpr);
         
         // Parse WHERE conditions
         $where = [];
@@ -97,6 +97,9 @@ class rex_api_relation_select extends rex_api_function
             $query .= " ORDER BY label";
         }
 
+        rex_logger::logError(1, 'Final query: ' . $query);
+        rex_logger::logError(1, 'Parameters: ' . print_r($params, true));
+
         try {
             $options = $sql->getArray($query, $params);
             
@@ -132,9 +135,9 @@ class rex_api_relation_select extends rex_api_function
         }
         
         if ($field && $operator && $value !== null) {
-            // Check for #value# syntax for strings with spaces
-            if (substr($value, 0, 1) === '#' && substr($value, -1) === '#') {
-                $value = substr($value, 1, -1);
+            // Check for [[value]] syntax for strings with spaces
+            if (preg_match('/^\[\[(.+?)\]\]$/', $value, $matches)) {
+                $value = $matches[1];
             }
             
             // Handle NULL values
