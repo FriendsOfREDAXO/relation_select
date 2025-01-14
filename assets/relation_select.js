@@ -1,20 +1,9 @@
 // relation_select.js
 $(document).on('rex:ready', function() {
-    // Cleanup old instances and make sure we don't double-initialize
-    $('.relation-select-widget').each(function() {
-        const input = $(this).prev('input[data-relation-config]');
-        if (input.length) {
-            input.show();
-        }
-        $(this).remove();
-    });
+    // Cleanup old instances
+    $('.relation-select-widget').remove();
 
     $('input[data-relation-config]').each(function() {
-        // Skip if already initialized
-        if ($(this).next('.relation-select-widget').length) {
-            return;
-        }
-
         const input = this;
         const config = JSON.parse(input.dataset.relationConfig || '{}');
         
@@ -34,32 +23,26 @@ $(document).on('rex:ready', function() {
 
         $(input).hide().after(widget);
 
-        // Build API URL with all parameters
-        const apiUrl = new URL('index.php', window.location.href);
-        apiUrl.searchParams.set('rex-api-call', 'relation_select');
-        apiUrl.searchParams.set('table', config.table);
-        apiUrl.searchParams.set('value_field', config.valueField);
-        apiUrl.searchParams.set('label_field', config.labelField);
+        // Load data using simple URL construction
+        let url = 'index.php?rex-api-call=relation_select';
+        url += '&table=' + encodeURIComponent(config.table);
+        url += '&value_field=' + encodeURIComponent(config.valueField);
+        url += '&label_field=' + encodeURIComponent(config.labelField);
         
-        // Add new filter and sort parameters if present
         if (config.dbw) {
-            apiUrl.searchParams.set('dbw', config.dbw);
+            url += '&dbw=' + encodeURIComponent(config.dbw);
         }
         if (config.dboy) {
-            apiUrl.searchParams.set('dboy', config.dboy);
+            url += '&dboy=' + encodeURIComponent(config.dboy);
         }
 
         // Load data
-        fetch(apiUrl.toString())
+        fetch(url)
             .then(response => response.json())
             .then(data => {
                 const selectedValues = input.value.split(',').filter(v => v);
                 const availableList = widget.find('.available-list');
                 const selectedList = widget.find('.selected-list');
-
-                // Clear lists before filling
-                availableList.empty();
-                selectedList.empty();
                 
                 // Fill available items
                 data.forEach(item => {
@@ -91,66 +74,58 @@ $(document).on('rex:ready', function() {
                     }
                 });
 
-                // Make selected list sortable only once
-                if (!widget.data('sortable-initialized')) {
-                    new Sortable(selectedList[0], {
-                        handle: '.handle',
-                        animation: 150,
-                        onSort: () => updateValue()
-                    });
-                    widget.data('sortable-initialized', true);
-                }
+                // Make selected list sortable
+                new Sortable(selectedList[0], {
+                    handle: '.handle',
+                    animation: 150,
+                    onSort: () => updateValue()
+                });
 
-                // Bind events only once
-                if (!widget.data('events-initialized')) {
-                    // Search functionality
-                    widget.find('.relation-select-search').on('input', function() {
-                        const search = this.value.toLowerCase();
-                        availableList.find('li').each(function() {
-                            const text = $(this).find('.title').text().toLowerCase();
-                            $(this).toggle(text.includes(search));
-                        });
+                // Search functionality
+                widget.find('.relation-select-search').on('input', function() {
+                    const search = this.value.toLowerCase();
+                    availableList.find('li').each(function() {
+                        const text = $(this).find('.title').text().toLowerCase();
+                        $(this).toggle(text.includes(search));
                     });
+                });
 
-                    // Add item
-                    widget.on('click', '.add-item', function() {
-                        const li = $(this).closest('li');
-                        const value = li.data('value');
-                        const title = li.find('.title').text();
-                        
-                        selectedList.append(`
-                            <li data-value="${value}">
-                                <i class="fa fa-bars handle"></i>
-                                <span class="title">${title}</span>
-                                <button type="button" class="btn btn-link remove-item">
-                                    <i class="fa fa-minus"></i>
-                                </button>
-                            </li>
-                        `);
-                        li.remove();
-                        updateValue();
-                    });
+                // Add item
+                widget.on('click', '.add-item', function() {
+                    const li = $(this).closest('li');
+                    const value = li.data('value');
+                    const title = li.find('.title').text();
+                    
+                    selectedList.append(`
+                        <li data-value="${value}">
+                            <i class="fa fa-bars handle"></i>
+                            <span class="title">${title}</span>
+                            <button type="button" class="btn btn-link remove-item">
+                                <i class="fa fa-minus"></i>
+                            </button>
+                        </li>
+                    `);
+                    li.remove();
+                    updateValue();
+                });
 
-                    // Remove item
-                    widget.on('click', '.remove-item', function() {
-                        const li = $(this).closest('li');
-                        const value = li.data('value');
-                        const title = li.find('.title').text();
-                        
-                        availableList.append(`
-                            <li data-value="${value}">
-                                <span class="title">${title}</span>
-                                <button type="button" class="btn btn-link add-item">
-                                    <i class="fa fa-plus"></i>
-                                </button>
-                            </li>
-                        `);
-                        li.remove();
-                        updateValue();
-                    });
-
-                    widget.data('events-initialized', true);
-                }
+                // Remove item
+                widget.on('click', '.remove-item', function() {
+                    const li = $(this).closest('li');
+                    const value = li.data('value');
+                    const title = li.find('.title').text();
+                    
+                    availableList.append(`
+                        <li data-value="${value}">
+                            <span class="title">${title}</span>
+                            <button type="button" class="btn btn-link add-item">
+                                <i class="fa fa-plus"></i>
+                            </button>
+                        </li>
+                    `);
+                    li.remove();
+                    updateValue();
+                });
 
                 function updateValue() {
                     const values = [];
@@ -160,6 +135,10 @@ $(document).on('rex:ready', function() {
                     input.value = values.join(',');
                     $(input).trigger('change');
                 }
+            })
+            .catch(error => {
+                console.error('Error loading data:', error);
+                widget.find('.available-list').html('<li class="error">Fehler beim Laden der Daten</li>');
             });
     });
 });
