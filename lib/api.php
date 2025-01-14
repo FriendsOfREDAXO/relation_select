@@ -17,36 +17,17 @@ class rex_api_relation_select extends rex_api_function
 
         $sql = rex_sql::factory();
         
-        // Parse label fields and separators
-        $parts = array_map('trim', explode('|', $labelField));
+        // Parse label fields
+        $fields = array_map('trim', explode('|', $labelField));
         $labelExpr = [];
         
-        foreach ($parts as $part) {
-            if ($part === '') {
-                continue;
-            }
-            
-            // Handle [[text]] parts and field names separately
-            if (preg_match('/^\[\[(.+?)\]\]$/', $part, $matches)) {
-                // It's a literal string
-                $string = $matches[1];
-                $labelExpr[] = "'" . $sql->escape($string) . "'";
-            } else {
-                // It's a field
-                $labelExpr[] = $sql->escapeIdentifier($part);
+        foreach ($fields as $field) {
+            if ($field !== '') {
+                $labelExpr[] = $sql->escapeIdentifier($field);
             }
         }
 
-        // Add spaces between expressions
-        $finalExpr = [];
-        for ($i = 0; $i < count($labelExpr); $i++) {
-            $finalExpr[] = $labelExpr[$i];
-            if ($i < count($labelExpr) - 1) {
-                $finalExpr[] = "' '";
-            }
-        }
-
-        $labelExpr = "CONCAT(" . implode(', ', $finalExpr) . ") as label";
+        $labelExpr = "CONCAT(" . implode(", ' ', ", $labelExpr) . ") as label";
         
         // Parse WHERE conditions
         $where = [];
@@ -127,11 +108,6 @@ class rex_api_relation_select extends rex_api_function
         }
         
         if ($field && $operator && $value !== null) {
-            // Check for [[value]] syntax for strings with spaces
-            if (preg_match('/^\[\[(.+?)\]\]$/', $value, $matches)) {
-                $value = $matches[1];
-            }
-            
             // Handle NULL values
             if (strtoupper($value) === 'NULL') {
                 return [
