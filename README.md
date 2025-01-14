@@ -10,6 +10,7 @@ Ermöglicht die Auswahl und Sortierung verknüpfter Datensätze mit erweiterten 
 - Drag & Drop Sortierung der ausgewählten Einträge
 - Unterstützung für Meta Infos
 - Automatische Datumswerte (now, today)
+- Flexible Label-Gestaltung durch Feldverknüpfungen
 
 ## Installation
 
@@ -18,35 +19,25 @@ Ermöglicht die Auswahl und Sortierung verknüpfter Datensätze mit erweiterten 
 
 ## Anwendung
 
-### Als Metainfo-Feld
-
-```php
-data-relation-config='{"table":"rex_article","valueField":"id","labelField":"name"}'
-```
-
-### Als HTML-Eingabefeld
-
+### Basis-Konfiguration
 ```html
 <input type="text" name="my_field" 
+    data-relation-mode="modal" 
     data-relation-config='{
-        "table": "rex_categories",
+        "table": "rex_article",
         "valueField": "id",
-        "labelField": "name",
-        "dbw": "status != 0, name ~ Start*",
-        "dboy": "name,ASC"
+        "labelField": "name"
     }'
 >
 ```
 
-## Parameter
+### Label-Syntax
 
-### Basis-Parameter
+Einfache Feldverknüpfung (mit automatischem Leerzeichen):
+```json
+"labelField": "firstname|lastname"
+```
 
-- `table`: Name der REDAXO-Tabelle
-- `valueField`: Feld für den zu speichernden Wert
-- `labelField`: Feld für die Anzeige
-- `dbw`: Filter-Bedingungen (WHERE)
-- `dboy`: Sortierung (ORDER BY)
 
 ### Filter-Syntax (dbw)
 
@@ -67,6 +58,7 @@ Der `dbw` Parameter ermöglicht das Filtern der Datensätze mit einer vereinfach
 - `now`: Aktuelle Zeit (CURRENT_TIMESTAMP)
 - `today`: Aktuelles Datum (CURRENT_DATE)
 - `NULL`: NULL-Wert
+- Text mit Leerzeichen: `[[Mein Text]]`
 
 #### Beispiele für Filter
 
@@ -120,49 +112,7 @@ Der `dboy` Parameter bestimmt die Sortierung der Einträge.
 "dboy": "priority,DESC,name,ASC"    // Nach Priorität, bei gleicher alphabetisch
 ```
 
-## Komplette Beispiele
 
-### Artikel-Auswahl mit Status-Filter
-
-```html
-<input type="text" name="articles" 
-    data-relation-config='{
-        "table": "rex_article",
-        "valueField": "id",
-        "labelField": "name",
-        "dbw": "status = 1, parent_id != 0",
-        "dboy": "priority,DESC,name,ASC"
-    }'
->
-```
-
-### Kategorien mit Textsuche
-
-```html
-<input type="text" name="categories" 
-    data-relation-config='{
-        "table": "rex_categories",
-        "valueField": "id",
-        "labelField": "name",
-        "dbw": "name ~ Start*, status = 1",
-        "dboy": "name,ASC"
-    }'
->
-```
-
-### Termine mit Datums-Filter
-
-```html
-<input type="text" name="events" 
-    data-relation-config='{
-        "table": "rex_events",
-        "valueField": "id",
-        "labelField": "title",
-        "dbw": "date_from > now, status != 0",
-        "dboy": "date_from,ASC,title,ASC"
-    }'
->
-```
 ## Autor
 
 **Friends Of REDAXO**
@@ -179,7 +129,3 @@ Der `dboy` Parameter bestimmt die Sortierung der Einträge.
 
 MIT License - siehe [LICENSE.md](LICENSE.md)
 
-## Support
-
-- Hilfe auf [REDAXO.org](https://www.redaxo.org/forum/)
-- Fehler auf [Github](https://github.com/your/repo/issues) melden
