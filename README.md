@@ -62,31 +62,32 @@ Der `dbw` Parameter ermöglicht das Filtern der Datensätze mit einer vereinfach
 
 #### Beispiele für Filter
 
-```php
+```json
 // Einfache Vergleiche
-"dbw": "status=1"                               // Status ist 1
-"dbw": "priority>=5"                            // Priorität >= 5
-"dbw": "parent_id!=0"                           // Kein Hauptartikel
+"dbw": "status = 1"
+"dbw": "priority >= 5"
+"dbw": "parent_id != 0"
 
 // Textsuche
-"dbw": "name=#Max Muster#"                      // Name ist genau "Max Muster"
-"dbw": "name~#Max#"                             // Name enthält "Max"
-"dbw": "name~#Start*#"                          // Name beginnt mit "Start"
-"dbw": "description~#*wichtig*#"                // Beschreibung enthält "wichtig"
+"dbw": "name = Willi Meier"              // Exakte Übereinstimmung
+"dbw": "name ~ Meier"                    // Enthält "Meier" irgendwo
+"dbw": "name ~ Start*"                   // Beginnt mit "Start"
+"dbw": "name ~ *Ende"                    // Endet mit "Ende"
+"dbw": "description ~ *wichtig*"         // Enthält "wichtig"
 
 // Datum und Zeit
-"dbw": "createdate>now"                         // Nur zukünftige Einträge
-"dbw": "date_from=today"                        // Einträge von heute
-"dbw": "valid_until>now"                        // Noch gültige Einträge
+"dbw": "createdate > now"                // Nur zukünftige Einträge
+"dbw": "date_from = today"               // Einträge von heute
+"dbw": "valid_until > now"               // Noch gültige Einträge
 
 // NULL-Werte
-"dbw": "parent_id=NULL"                         // Nur Hauptkategorien
-"dbw": "updated!=NULL"                          // Nur bearbeitete Einträge
+"dbw": "parent_id = NULL"                // Nur Hauptkategorien
+"dbw": "updated != NULL"                 // Nur bearbeitete Einträge
 
-// Mehrere Bedingungen (mit AND verknüpft)
-"dbw": "status=1,parent_id!=0"                  // Online und kein Hauptartikel
-"dbw": "name~#Start*#,status!=0"               // Beginnt mit "Start" und online
-"dbw": "title=#Mein Artikel#,status=1"         // Exakter Titel und online
+// Mehrere Bedingungen
+"dbw": "status = 1, parent_id != 0"      // Online und keine Hauptkategorie
+"dbw": "name ~ Start*, status != 0"      // Beginnt mit "Start" und online
+"dbw": "priority >= 5, createdate > now" // Wichtige zukünftige Einträge
 ```
 
 ### Sortier-Syntax (dboy)
