@@ -17,6 +17,21 @@ class rex_api_relation_select extends rex_api_function
 
         $sql = rex_sql::factory();
         
+        // Parse label fields and separators
+        $parts = array_map('trim', explode('|', $labelField));
+        $labelExpr = [];
+        foreach ($parts as $part) {
+            if ($part === '') continue;
+            if (trim($part) === '-' || ctype_space($part)) {
+                // It's a separator
+                $labelExpr[] = "'" . $sql->escape($part) . "'";
+            } else {
+                // It's a field
+                $labelExpr[] = $sql->escapeIdentifier($part);
+            }
+        }
+        $labelExpr = "CONCAT(" . implode(', ', $labelExpr) . ") as label";
+        
         // Parse WHERE conditions
         $where = [];
         $params = [];
@@ -46,9 +61,9 @@ class rex_api_relation_select extends rex_api_function
             }
         }
         
-        // Build query with DISTINCT
+        // Build query
         $query = "SELECT DISTINCT " . $sql->escapeIdentifier($valueField) . " as value, " 
-               . $sql->escapeIdentifier($labelField) . " as label FROM " 
+               . $labelExpr . " FROM " 
                . $sql->escapeIdentifier($table);
         
         if (!empty($where)) {
