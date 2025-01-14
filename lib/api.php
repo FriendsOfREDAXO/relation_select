@@ -21,16 +21,37 @@ class rex_api_relation_select extends rex_api_function
         $parts = array_map('trim', explode('|', $labelField));
         $labelExpr = [];
         foreach ($parts as $part) {
-            if ($part === '') continue;
-            if (trim($part) === '-' || ctype_space($part)) {
-                // It's a separator
-                $labelExpr[] = "'" . $sql->escape($part) . "'";
-            } else {
-                // It's a field
-                $labelExpr[] = $sql->escapeIdentifier($part);
+            if ($part === '') {
+                // Empty part becomes space
+                $labelExpr[] = "' '";
+                continue;
+            }
+            
+            // Check for #string# syntax mixed with field names
+            preg_match_all('/#([^#]+)#|\b([^#\s]+)\b/', $part, $matches);
+            foreach ($matches[0] as $match) {
+                if (substr($match, 0, 1) === '#' && substr($match, -1) === '#') {
+                    // It's a literal string
+                    $string = substr($match, 1, -1);
+                    $labelExpr[] = "'" . $sql->escape($string) . "'";
+                } else {
+                    // It's a field
+                    $labelExpr[] = $sql->escapeIdentifier($match);
+                }
             }
         }
-        $labelExpr = "CONCAT(" . implode(', ', $labelExpr) . ") as label";
+
+        // If no separator was given between parts, add space
+        $finalExpr = [];
+        for ($i = 0; $i < count($labelExpr); $i++) {
+            $finalExpr[] = $labelExpr[$i];
+            // Add space between fields if next element exists and no literal string follows
+            if ($i < count($labelExpr) - 1 && !str_contains($labelExpr[$i], "'") && !str_contains($labelExpr[$i + 1], "'")) {
+                $finalExpr[] = "' '";
+            }
+        }
+
+        $labelExpr = "CONCAT(" . implode(', ', $finalExpr) . ") as label";
         
         // Parse WHERE conditions
         $where = [];
@@ -67,8 +88,9 @@ class rex_api_relation_select extends rex_api_function
                . $sql->escapeIdentifier($table);
         
         if (!empty($where)) {
-            $query .= ' WHERE ' . implode(' AND ', $where);
+            $query .= ' WHERE (' . implode(') AND (', $where) . ')';
         }
+        
         if (!empty($orderClauses)) {
             $query .= ' ORDER BY ' . implode(', ', $orderClauses);
         } else {
@@ -110,6 +132,11 @@ class rex_api_relation_select extends rex_api_function
         }
         
         if ($field && $operator && $value !== null) {
+            // Check for #value# syntax for strings with spaces
+            if (substr($value, 0, 1) === '#' && substr($value, -1) === '#') {
+                $value = substr($value, 1, -1);
+            }
+            
             // Handle NULL values
             if (strtoupper($value) === 'NULL') {
                 return [
@@ -140,7 +167,7 @@ class rex_api_relation_select extends rex_api_function
                 ];
             }
             
-            // Regular value
+            // Regular value with parameter binding
             return [
                 'sql' => $sql->escapeIdentifier($field) . " $operator ?",
                 'value' => $value
