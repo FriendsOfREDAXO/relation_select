@@ -36,11 +36,24 @@ $(document).on('rex:ready', function() {
 
         $(input).hide().after(widget);
 
-        // Build API URL
-        let url = 'index.php?rex-api-call=relation_select';
-        url += '&table=' + encodeURIComponent(config.table);
-        url += '&value_field=' + encodeURIComponent(config.valueField);
-        url += '&label_field=' + encodeURIComponent(config.labelField);
+        // Build API URL using URLSearchParams for proper encoding
+        const params = new URLSearchParams({
+            'rex-api-call': 'relation_select',
+            'table': config.table,
+            'value_field': config.valueField,
+            'label_field': config.labelField
+        });
+
+        // Add optional parameters if they exist
+        if (config.dbw) {
+            params.append('dbw', config.dbw);
+        }
+        if (config.dboy) {
+            params.append('dboy', config.dboy);
+        }
+
+        const url = 'index.php?' + params.toString();
+        console.log('API URL:', url); // Debug output
 
         // Load data
         fetch(url)
