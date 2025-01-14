@@ -57,13 +57,16 @@ class rex_api_relation_select extends rex_api_function
             $query .= " ORDER BY $labelField";
         }
 
-        $sql->setDebug(true);  // Debug aktivieren
-        $options = $sql->getArray($query, $params);
-        $sql->setDebug(false); // Debug deaktivieren
-
-        header('Content-Type: application/json');
-        echo json_encode($options);
-        exit;
+        try {
+            $options = $sql->getArray($query, $params);
+            
+            header('Content-Type: application/json');
+            echo json_encode($options);
+            exit;
+            
+        } catch (rex_sql_exception $e) {
+            throw new rex_api_exception($e->getMessage());
+        }
     }
     
     private function parseCondition($condition) 
