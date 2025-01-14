@@ -172,6 +172,7 @@ Der `dboy` Parameter bestimmt die Sortierung der Einträge.
 
 **Projektleitung**
 
+[Peter Bickel](https://github.com/polarpixel)
 [Thomas Skerbis](https://github.com/skerbis)
 
 ## Lizenz
