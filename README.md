@@ -36,18 +36,18 @@ Ermöglicht die Auswahl und Sortierung verknüpfter Datensätze mit erweiterten 
 Das `labelField` ermöglicht verschiedene Varianten der Anzeige:
 
 1. Einfache Feldverknüpfung (mit automatischem Leerzeichen):
-```php
+```json
 "labelField": "firstname|lastname"                    // "Max Mustermann"
 ```
 
 2. Mit beschreibenden Texten:
-```php
+```json
 "labelField": "#Vorname: #|firstname|# Nachname: #|lastname"  // "Vorname: Max Nachname: Mustermann"
 "labelField": "#ID: #|id|# - #|title"                        // "ID: 123 - Mein Artikel"
 ```
 
 3. Komplexere Formatierungen:
-```php
+```json
 "labelField": "#(#|id|#) #|firstname|# #|lastname"           // "(123) Max Mustermann"
 "labelField": "firstname|# (#|id|#)#"                        // "Max (123)"
 ```
@@ -113,7 +113,7 @@ Der `dboy` Parameter bestimmt die Sortierung der Einträge.
 
 #### Beispiele für Sortierung
 
-```php
+```json
 // Einfache Sortierung
 "dboy": "name,ASC"                  // Alphabetisch nach Name
 "dboy": "priority,DESC"             // Höchste Priorität zuerst
