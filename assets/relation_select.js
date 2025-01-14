@@ -1,9 +1,20 @@
 // relation_select.js
 $(document).on('rex:ready', function() {
-    // Cleanup old instances
-    $('.relation-select-widget').remove();
+    // Cleanup old instances and make sure we don't double-initialize
+    $('.relation-select-widget').each(function() {
+        const input = $(this).prev('input[data-relation-config]');
+        if (input.length) {
+            input.show();
+        }
+        $(this).remove();
+    });
 
     $('input[data-relation-config]').each(function() {
+        // Skip if already initialized
+        if ($(this).next('.relation-select-widget').length) {
+            return;
+        }
+
         const input = this;
         const config = JSON.parse(input.dataset.relationConfig || '{}');
         
@@ -45,6 +56,10 @@ $(document).on('rex:ready', function() {
                 const selectedValues = input.value.split(',').filter(v => v);
                 const availableList = widget.find('.available-list');
                 const selectedList = widget.find('.selected-list');
+
+                // Clear lists before filling
+                availableList.empty();
+                selectedList.empty();
                 
                 // Fill available items
                 data.forEach(item => {
@@ -76,58 +91,66 @@ $(document).on('rex:ready', function() {
                     }
                 });
 
-                // Make selected list sortable
-                new Sortable(selectedList[0], {
-                    handle: '.handle',
-                    animation: 150,
-                    onSort: () => updateValue()
-                });
-
-                // Search functionality
-                widget.find('.relation-select-search').on('input', function() {
-                    const search = this.value.toLowerCase();
-                    availableList.find('li').each(function() {
-                        const text = $(this).find('.title').text().toLowerCase();
-                        $(this).toggle(text.includes(search));
+                // Make selected list sortable only once
+                if (!widget.data('sortable-initialized')) {
+                    new Sortable(selectedList[0], {
+                        handle: '.handle',
+                        animation: 150,
+                        onSort: () => updateValue()
                     });
-                });
+                    widget.data('sortable-initialized', true);
+                }
 
-                // Add item
-                widget.on('click', '.add-item', function() {
-                    const li = $(this).closest('li');
-                    const value = li.data('value');
-                    const title = li.find('.title').text();
-                    
-                    selectedList.append(`
-                        <li data-value="${value}">
-                            <i class="fa fa-bars handle"></i>
-                            <span class="title">${title}</span>
-                            <button type="button" class="btn btn-link remove-item">
-                                <i class="fa fa-minus"></i>
-                            </button>
-                        </li>
-                    `);
-                    li.remove();
-                    updateValue();
-                });
+                // Bind events only once
+                if (!widget.data('events-initialized')) {
+                    // Search functionality
+                    widget.find('.relation-select-search').on('input', function() {
+                        const search = this.value.toLowerCase();
+                        availableList.find('li').each(function() {
+                            const text = $(this).find('.title').text().toLowerCase();
+                            $(this).toggle(text.includes(search));
+                        });
+                    });
 
-                // Remove item
-                widget.on('click', '.remove-item', function() {
-                    const li = $(this).closest('li');
-                    const value = li.data('value');
-                    const title = li.find('.title').text();
-                    
-                    availableList.append(`
-                        <li data-value="${value}">
-                            <span class="title">${title}</span>
-                            <button type="button" class="btn btn-link add-item">
-                                <i class="fa fa-plus"></i>
-                            </button>
-                        </li>
-                    `);
-                    li.remove();
-                    updateValue();
-                });
+                    // Add item
+                    widget.on('click', '.add-item', function() {
+                        const li = $(this).closest('li');
+                        const value = li.data('value');
+                        const title = li.find('.title').text();
+                        
+                        selectedList.append(`
+                            <li data-value="${value}">
+                                <i class="fa fa-bars handle"></i>
+                                <span class="title">${title}</span>
+                                <button type="button" class="btn btn-link remove-item">
+                                    <i class="fa fa-minus"></i>
+                                </button>
+                            </li>
+                        `);
+                        li.remove();
+                        updateValue();
+                    });
+
+                    // Remove item
+                    widget.on('click', '.remove-item', function() {
+                        const li = $(this).closest('li');
+                        const value = li.data('value');
+                        const title = li.find('.title').text();
+                        
+                        availableList.append(`
+                            <li data-value="${value}">
+                                <span class="title">${title}</span>
+                                <button type="button" class="btn btn-link add-item">
+                                    <i class="fa fa-plus"></i>
+                                </button>
+                            </li>
+                        `);
+                        li.remove();
+                        updateValue();
+                    });
+
+                    widget.data('events-initialized', true);
+                }
 
                 function updateValue() {
                     const values = [];
