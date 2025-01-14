@@ -47,7 +47,7 @@ class rex_api_relation_select extends rex_api_function
         }
         
         // Build query
-        $query = "SELECT DISTINCT $valueField as value, $labelField as label FROM $table";
+        $query = "SELECT $valueField as value, $labelField as label FROM $table";
         if (!empty($where)) {
             $query .= ' WHERE ' . implode(' AND ', $where);
         }
@@ -56,12 +56,11 @@ class rex_api_relation_select extends rex_api_function
         } else {
             $query .= " ORDER BY $labelField";
         }
-        
-        // Debug query and results
-        rex_logger::logError(1, $query, $params);
+
+        $sql->setDebug(true);  // Debug aktivieren
         $options = $sql->getArray($query, $params);
-        rex_logger::logError(1, 'Results count: ' . count($options));
-        
+        $sql->setDebug(false); // Debug deaktivieren
+
         header('Content-Type: application/json');
         echo json_encode($options);
         exit;
