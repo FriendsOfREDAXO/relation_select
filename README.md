@@ -31,62 +31,26 @@ Ermöglicht die Auswahl und Sortierung verknüpfter Datensätze mit erweiterten 
 >
 ```
 
-### Label aus mehreren Feldern
-```html
-<!-- Mit Leerzeichen -->
-<input type="text" name="my_field" 
-    data-relation-mode="modal" 
-    data-relation-config='{
-        "table": "rex_article",
-        "valueField": "id",
-        "labelField": "name| |nachname"
-    }'
->
+### Label-Syntax
 
-<!-- Mit Bindestrich -->
-<input type="text" name="my_field" 
-    data-relation-mode="modal" 
-    data-relation-config='{
-        "table": "rex_article",
-        "valueField": "id",
-        "labelField": "name| - |nachname"
-    }'
->
+Das `labelField` ermöglicht verschiedene Varianten der Anzeige:
 
-<!-- Komplexe Verknüpfung -->
-<input type="text" name="my_field" 
-    data-relation-mode="modal" 
-    data-relation-config='{
-        "table": "rex_article",
-        "valueField": "id",
-        "labelField": "name| - |nachname| - |id"
-    }'
->
+1. Einfache Feldverknüpfung (mit automatischem Leerzeichen):
+```php
+"labelField": "firstname|lastname"                    // "Max Mustermann"
 ```
 
-### Mit Filter und Sortierung
-```html
-<input type="text" name="my_field" 
-    data-relation-mode="modal" 
-    data-relation-config='{
-        "table": "rex_article",
-        "valueField": "id",
-        "labelField": "name",
-        "dbw": "status = 1, name ~ Start*",
-        "dboy": "name,ASC"
-    }'
->
+2. Mit beschreibenden Texten:
+```php
+"labelField": "#Vorname: #|firstname|# Nachname: #|lastname"  // "Vorname: Max Nachname: Mustermann"
+"labelField": "#ID: #|id|# - #|title"                        // "ID: 123 - Mein Artikel"
 ```
 
-## Parameter
-
-### Basis-Parameter
-
-- `table`: Name der REDAXO-Tabelle
-- `valueField`: Feld für den zu speichernden Wert
-- `labelField`: Feld(er) für die Anzeige, mit | getrennt für Verknüpfungen
-- `dbw`: Filter-Bedingungen (WHERE)
-- `dboy`: Sortierung (ORDER BY)
+3. Komplexere Formatierungen:
+```php
+"labelField": "#(#|id|#) #|firstname|# #|lastname"           // "(123) Max Mustermann"
+"labelField": "firstname|# (#|id|#)#"                        // "Max (123)"
+```
 
 ### Filter-Syntax (dbw)
 
@@ -107,35 +71,35 @@ Der `dbw` Parameter ermöglicht das Filtern der Datensätze mit einer vereinfach
 - `now`: Aktuelle Zeit (CURRENT_TIMESTAMP)
 - `today`: Aktuelles Datum (CURRENT_DATE)
 - `NULL`: NULL-Wert
+- Text mit Leerzeichen: `#Mein Text#`
 
 #### Beispiele für Filter
 
-```json
+```php
 // Einfache Vergleiche
-"dbw": "status = 1"
-"dbw": "priority >= 5"
-"dbw": "parent_id != 0"
+"dbw": "status=1"                               // Status ist 1
+"dbw": "priority>=5"                            // Priorität >= 5
+"dbw": "parent_id!=0"                           // Kein Hauptartikel
 
 // Textsuche
-"dbw": "name = Willi Meier"              // Exakte Übereinstimmung
-"dbw": "name ~ Meier"                    // Enthält "Meier" irgendwo
-"dbw": "name ~ Start*"                   // Beginnt mit "Start"
-"dbw": "name ~ *Ende"                    // Endet mit "Ende"
-"dbw": "description ~ *wichtig*"         // Enthält "wichtig"
+"dbw": "name=#Max Muster#"                      // Name ist genau "Max Muster"
+"dbw": "name~#Max#"                             // Name enthält "Max"
+"dbw": "name~#Start*#"                          // Name beginnt mit "Start"
+"dbw": "description~#*wichtig*#"                // Beschreibung enthält "wichtig"
 
 // Datum und Zeit
-"dbw": "createdate > now"                // Nur zukünftige Einträge
-"dbw": "date_from = today"               // Einträge von heute
-"dbw": "valid_until > now"               // Noch gültige Einträge
+"dbw": "createdate>now"                         // Nur zukünftige Einträge
+"dbw": "date_from=today"                        // Einträge von heute
+"dbw": "valid_until>now"                        // Noch gültige Einträge
 
 // NULL-Werte
-"dbw": "parent_id = NULL"                // Nur Hauptkategorien
-"dbw": "updated != NULL"                 // Nur bearbeitete Einträge
+"dbw": "parent_id=NULL"                         // Nur Hauptkategorien
+"dbw": "updated!=NULL"                          // Nur bearbeitete Einträge
 
-// Mehrere Bedingungen
-"dbw": "status = 1, parent_id != 0"      // Online und keine Hauptkategorie
-"dbw": "name ~ Start*, status != 0"      // Beginnt mit "Start" und online
-"dbw": "priority >= 5, createdate > now" // Wichtige zukünftige Einträge
+// Mehrere Bedingungen (mit AND verknüpft)
+"dbw": "status=1,parent_id!=0"                  // Online und kein Hauptartikel
+"dbw": "name~#Start*#,status!=0"               // Beginnt mit "Start" und online
+"dbw": "title=#Mein Artikel#,status=1"         // Exakter Titel und online
 ```
 
 ### Sortier-Syntax (dboy)
@@ -149,7 +113,7 @@ Der `dboy` Parameter bestimmt die Sortierung der Einträge.
 
 #### Beispiele für Sortierung
 
-```json
+```php
 // Einfache Sortierung
 "dboy": "name,ASC"                  // Alphabetisch nach Name
 "dboy": "priority,DESC"             // Höchste Priorität zuerst
@@ -159,6 +123,7 @@ Der `dboy` Parameter bestimmt die Sortierung der Einträge.
 "dboy": "parent_id,ASC,name,ASC"    // Nach Kategorie, dann alphabetisch
 "dboy": "priority,DESC,name,ASC"    // Nach Priorität, bei gleicher alphabetisch
 ```
+
 
 ## Autor
 
