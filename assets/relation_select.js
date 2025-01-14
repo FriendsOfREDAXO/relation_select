@@ -1,3 +1,4 @@
+// relation_select.js
 $(document).on('rex:ready', function() {
     // Cleanup old instances
     $('.relation-select-widget').remove();
@@ -22,8 +23,23 @@ $(document).on('rex:ready', function() {
 
         $(input).hide().after(widget);
 
+        // Build API URL with all parameters
+        const apiUrl = new URL('index.php', window.location.href);
+        apiUrl.searchParams.set('rex-api-call', 'relation_select');
+        apiUrl.searchParams.set('table', config.table);
+        apiUrl.searchParams.set('value_field', config.valueField);
+        apiUrl.searchParams.set('label_field', config.labelField);
+        
+        // Add new filter and sort parameters if present
+        if (config.dbw) {
+            apiUrl.searchParams.set('dbw', config.dbw);
+        }
+        if (config.dboy) {
+            apiUrl.searchParams.set('dboy', config.dboy);
+        }
+
         // Load data
-        fetch(`index.php?rex-api-call=relation_select&table=${config.table}&value_field=${config.valueField}&label_field=${config.labelField}`)
+        fetch(apiUrl.toString())
             .then(response => response.json())
             .then(data => {
                 const selectedValues = input.value.split(',').filter(v => v);
