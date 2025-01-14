@@ -20,8 +20,6 @@ class rex_api_relation_select extends rex_api_function
         // Parse label fields and separators
         $parts = array_map('trim', explode('|', $labelField));
         $labelExpr = [];
-
-        rex_logger::logError(1, 'Label parts: ' . print_r($parts, true));
         
         foreach ($parts as $part) {
             if ($part === '') {
@@ -33,11 +31,9 @@ class rex_api_relation_select extends rex_api_function
                 // It's a literal string
                 $string = $matches[1];
                 $labelExpr[] = "'" . $sql->escape($string) . "'";
-                rex_logger::logError(1, 'Added literal: ' . $string);
             } else {
                 // It's a field
                 $labelExpr[] = $sql->escapeIdentifier($part);
-                rex_logger::logError(1, 'Added field: ' . $part);
             }
         }
 
@@ -51,7 +47,6 @@ class rex_api_relation_select extends rex_api_function
         }
 
         $labelExpr = "CONCAT(" . implode(', ', $finalExpr) . ") as label";
-        rex_logger::logError(1, 'Final label expression: ' . $labelExpr);
         
         // Parse WHERE conditions
         $where = [];
@@ -96,9 +91,6 @@ class rex_api_relation_select extends rex_api_function
         } else {
             $query .= " ORDER BY label";
         }
-
-        rex_logger::logError(1, 'Final query: ' . $query);
-        rex_logger::logError(1, 'Parameters: ' . print_r($params, true));
 
         try {
             $options = $sql->getArray($query, $params);
