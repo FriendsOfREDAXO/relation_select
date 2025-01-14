@@ -1,10 +1,24 @@
+// relation_select.js
 $(document).on('rex:ready', function() {
     // Cleanup old instances
     $('.relation-select-widget').remove();
 
     $('input[data-relation-config]').each(function() {
         const input = this;
-        const config = JSON.parse(input.dataset.relationConfig || '{}');
+        let config;
+        
+        try {
+            config = JSON.parse(input.dataset.relationConfig || '{}');
+        } catch (e) {
+            console.error('Invalid relation config:', e);
+            return;
+        }
+
+        // Check required config
+        if (!config.table || !config.valueField || !config.labelField) {
+            console.error('Missing required config parameters');
+            return;
+        }
         
         // Create widget structure
         const widget = $(`
@@ -22,9 +36,33 @@ $(document).on('rex:ready', function() {
 
         $(input).hide().after(widget);
 
+        // Build API URL using URLSearchParams for proper encoding
+        const params = new URLSearchParams({
+            'rex-api-call': 'relation_select',
+            'table': config.table,
+            'value_field': config.valueField,
+            'label_field': config.labelField
+        });
+
+        // Add optional parameters if they exist
+        if (config.dbw) {
+            params.append('dbw', config.dbw);
+        }
+        if (config.dboy) {
+            params.append('dboy', config.dboy);
+        }
+
+        const url = 'index.php?' + params.toString();
+        console.log('API URL:', url); // Debug output
+
         // Load data
-        fetch(`index.php?rex-api-call=relation_select&table=${config.table}&value_field=${config.valueField}&label_field=${config.labelField}`)
-            .then(response => response.json())
+        fetch(url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
             .then(data => {
                 const selectedValues = input.value.split(',').filter(v => v);
                 const availableList = widget.find('.available-list');
@@ -121,6 +159,10 @@ $(document).on('rex:ready', function() {
                     input.value = values.join(',');
                     $(input).trigger('change');
                 }
+            })
+            .catch(error => {
+                console.error('Error loading data:', error);
+                widget.find('.available-list').html('<li class="error">Fehler beim Laden der Daten</li>');
             });
     });
 });
