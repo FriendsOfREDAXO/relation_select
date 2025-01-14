@@ -33,24 +33,11 @@ Ermöglicht die Auswahl und Sortierung verknüpfter Datensätze mit erweiterten 
 
 ### Label-Syntax
 
-Das `labelField` ermöglicht verschiedene Varianten der Anzeige:
-
-1. Einfache Feldverknüpfung (mit automatischem Leerzeichen):
+Einfache Feldverknüpfung (mit automatischem Leerzeichen):
 ```json
-"labelField": "firstname|lastname"                    // "Max Mustermann"
+"labelField": "firstname|lastname"
 ```
 
-2. Mit beschreibenden Texten:
-```json
-"labelField": "#Vorname: #|firstname|# Nachname: #|lastname"  // "Vorname: Max Nachname: Mustermann"
-"labelField": "#ID: #|id|# - #|title"                        // "ID: 123 - Mein Artikel"
-```
-
-3. Komplexere Formatierungen:
-```json
-"labelField": "#(#|id|#) #|firstname|# #|lastname"           // "(123) Max Mustermann"
-"labelField": "firstname|# (#|id|#)#"                        // "Max (123)"
-```
 
 ### Filter-Syntax (dbw)
 
@@ -71,7 +58,7 @@ Der `dbw` Parameter ermöglicht das Filtern der Datensätze mit einer vereinfach
 - `now`: Aktuelle Zeit (CURRENT_TIMESTAMP)
 - `today`: Aktuelles Datum (CURRENT_DATE)
 - `NULL`: NULL-Wert
-- Text mit Leerzeichen: `#Mein Text#`
+- Text mit Leerzeichen: `[[Mein Text]]`
 
 #### Beispiele für Filter
 
