@@ -5,7 +5,20 @@ $(document).on('rex:ready', function() {
 
     $('input[data-relation-config]').each(function() {
         const input = this;
-        const config = JSON.parse(input.dataset.relationConfig || '{}');
+        let config;
+        
+        try {
+            config = JSON.parse(input.dataset.relationConfig || '{}');
+        } catch (e) {
+            console.error('Invalid relation config:', e);
+            return;
+        }
+
+        // Check required config
+        if (!config.table || !config.valueField || !config.labelField) {
+            console.error('Missing required config parameters');
+            return;
+        }
         
         // Create widget structure
         const widget = $(`
@@ -23,22 +36,20 @@ $(document).on('rex:ready', function() {
 
         $(input).hide().after(widget);
 
-        // Load data using simple URL construction
+        // Build API URL
         let url = 'index.php?rex-api-call=relation_select';
         url += '&table=' + encodeURIComponent(config.table);
         url += '&value_field=' + encodeURIComponent(config.valueField);
         url += '&label_field=' + encodeURIComponent(config.labelField);
-        
-        if (config.dbw) {
-            url += '&dbw=' + encodeURIComponent(config.dbw);
-        }
-        if (config.dboy) {
-            url += '&dboy=' + encodeURIComponent(config.dboy);
-        }
 
         // Load data
         fetch(url)
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
             .then(data => {
                 const selectedValues = input.value.split(',').filter(v => v);
                 const availableList = widget.find('.available-list');
