@@ -46,15 +46,18 @@ class rex_api_relation_select extends rex_api_function
             }
         }
         
-        // Build query
-        $query = "SELECT $valueField as value, $labelField as label FROM $table";
+        // Build query with DISTINCT
+        $query = "SELECT DISTINCT " . $sql->escapeIdentifier($valueField) . " as value, " 
+               . $sql->escapeIdentifier($labelField) . " as label FROM " 
+               . $sql->escapeIdentifier($table);
+        
         if (!empty($where)) {
             $query .= ' WHERE ' . implode(' AND ', $where);
         }
         if (!empty($orderClauses)) {
             $query .= ' ORDER BY ' . implode(', ', $orderClauses);
         } else {
-            $query .= " ORDER BY $labelField";
+            $query .= " ORDER BY label";
         }
 
         try {
