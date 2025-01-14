@@ -163,6 +163,16 @@ Der `dboy` Parameter bestimmt die Sortierung der Einträge.
     }'
 >
 ```
+## Autor
+
+**Friends Of REDAXO**
+
+* http://www.redaxo.org
+* https://github.com/FriendsOfREDAXO
+
+**Projektleitung**
+
+[Thomas Skerbis](https://github.com/skerbis)
 
 ## Lizenz
 
