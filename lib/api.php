@@ -35,7 +35,7 @@ class rex_api_relation_select extends rex_api_function
         if ($dbWhere) {
             $conditions = array_map('trim', explode(',', $dbWhere));
             foreach ($conditions as $condition) {
-                $parsedCondition = $this->parseCondition($condition);
+                $parsedCondition = $this->parseCondition(trim($condition));
                 if ($parsedCondition) {
                     $where[] = $parsedCondition['sql'];
                     if (isset($parsedCondition['value'])) {
@@ -64,7 +64,7 @@ class rex_api_relation_select extends rex_api_function
                . $sql->escapeIdentifier($table);
         
         if (!empty($where)) {
-            $query .= ' WHERE (' . implode(') AND (', $where) . ')';
+            $query .= ' WHERE ' . implode(' AND ', $where);
         }
         
         if (!empty($orderClauses)) {
@@ -89,19 +89,24 @@ class rex_api_relation_select extends rex_api_function
     {
         $sql = rex_sql::factory();
         
+        // Remove all extra whitespace and trim
+        $condition = trim(preg_replace('/\s+/', ' ', $condition));
+        
         // Replace common date functions
         $condition = str_replace('now', 'CURRENT_TIMESTAMP', $condition);
         $condition = str_replace('today', 'CURRENT_DATE', $condition);
         
-        // Teile die Bedingung beim ersten Auftreten von Operatoren
+        // Find operator and split condition
         $operators = ['!=', '>=', '<=', '=', '>', '<', '~'];
         $field = null;
         $operator = null;
         $value = null;
         
         foreach ($operators as $op) {
-            if (strpos($condition, $op) !== false) {
-                list($field, $value) = array_map('trim', explode($op, $condition, 2));
+            $parts = explode($op, $condition);
+            if (count($parts) === 2) {
+                $field = trim($parts[0]);
+                $value = trim($parts[1]);
                 $operator = $op;
                 break;
             }
