@@ -69,3 +69,17 @@
 .relation-select-list li.sortable-drag {
     background: #fff;
 }
+
+/* Darstellung Metainfo */
+
+.metainfo-sidebar .relation-select-widget {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin: 10px 0;
+}
+
+.metainfo-sidebar .relation-select-available,
+.metainfo-sidebar .relation-select-selected {
+    width: 100%;
+}
