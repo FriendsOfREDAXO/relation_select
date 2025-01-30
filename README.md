@@ -90,9 +90,9 @@ Der `dbw` Parameter ermöglicht das Filtern der Datensätze mit einer vereinfach
 "dbw": "priority >= 5, createdate > now" // Wichtige zukünftige Einträge
 ```
 
-### Sortier-Syntax (dboy)
+### Sortier-Syntax (dbob)
 
-Der `dboy` Parameter bestimmt die Sortierung der Einträge.
+Der `dbob` Parameter bestimmt die Sortierung der Einträge.
 
 #### Format
 - Komma-getrennte Liste: `Feld,Richtung,Feld,Richtung,...`
@@ -103,13 +103,13 @@ Der `dboy` Parameter bestimmt die Sortierung der Einträge.
 
 ```json
 // Einfache Sortierung
-"dboy": "name,ASC"                  // Alphabetisch nach Name
-"dboy": "priority,DESC"             // Höchste Priorität zuerst
-"dboy": "createdate,DESC"           // Neueste zuerst
+"dbob": "name,ASC"                  // Alphabetisch nach Name
+"dbob": "priority,DESC"             // Höchste Priorität zuerst
+"dbob": "createdate,DESC"           // Neueste zuerst
 
 // Mehrfache Sortierung
-"dboy": "parent_id,ASC,name,ASC"    // Nach Kategorie, dann alphabetisch
-"dboy": "priority,DESC,name,ASC"    // Nach Priorität, bei gleicher alphabetisch
+"dbob": "parent_id,ASC,name,ASC"    // Nach Kategorie, dann alphabetisch
+"dbob": "priority,DESC,name,ASC"    // Nach Priorität, bei gleicher alphabetisch
 ```
 
 
