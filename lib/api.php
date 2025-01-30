@@ -9,7 +9,7 @@ class rex_api_relation_select extends rex_api_function
         $valueField = rex_get('value_field', 'string');
         $labelField = rex_get('label_field', 'string');
         $dbWhere = rex_get('dbw', 'string', '');
-        $dbOrderBy = rex_get('dboy', 'string', '');
+        $dbOrderBy = rex_get('dbob', 'string', '');
 
         if (!$table || !$valueField || !$labelField) {
             throw new rex_api_exception('Missing parameters');
