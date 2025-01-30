@@ -48,8 +48,8 @@ $(document).on('rex:ready', function() {
         if (config.dbw) {
             params.append('dbw', config.dbw);
         }
-        if (config.dboy) {
-            params.append('dboy', config.dboy);
+        if (config.dbob) {
+            params.append('dbob', config.dbob);
         }
 
         const url = 'index.php?' + params.toString();
