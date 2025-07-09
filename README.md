@@ -1,4 +1,4 @@
-# 🐣 Relation Select AddOn
+# Relation Select AddOn
 
 Ermöglicht die Auswahl und Sortierung verknüpfter Datensätze mit erweiterten Filter- und Sortiermöglichkeiten.
 
