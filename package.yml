@@ -4,6 +4,6 @@ author: Your Name
 supportpage: https://github.com/your/repo
 
 requires:
-    redaxo: '^5.13'
+    redaxo: '^5.17'
     php:
-        version: '>=8.0'
+        version: '>=8.1'
