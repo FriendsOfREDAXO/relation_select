@@ -1,5 +1,13 @@
 <?php
-class rex_api_relation_select extends rex_api_function
+
+namespace FriendsOfRedaxo\RelationSelect;
+
+use rex_api_exception;
+use rex_api_function;
+use rex_sql;
+use rex_sql_exception;
+
+class RelationSelect extends rex_api_function
 {
     protected $published = true;
 
