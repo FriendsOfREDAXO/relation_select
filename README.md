@@ -31,6 +31,14 @@ Ermöglicht die Auswahl und Sortierung verknüpfter Datensätze mit erweiterten 
 >
 ```
 
+### Beispiel für eine Relation in Yform
+
+Das Feld wird als Textfeld mit dem Namen der Relation angelegt (z.B. autoren_id).
+
+Bei den individuellen Attributen des Feldes kann dann folgendes eingetragen werden:
+
+`{"data-relation-mode":"modal","data-relation-config":"{\"table\": \"rex_autoren\",\"valueField\": \"id\",\"labelField\": \"anrede|vorname|nachname\"}"}`
+
 ### Label-Syntax
 
 Einfache Feldverknüpfung (mit automatischem Leerzeichen):
