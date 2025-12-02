@@ -1,0 +1,9 @@
+relation_select_title = Relation Select
+relation_select_install_success = Installation successful!
+relation_select_install_token_msg = Your API token has been generated. Please note down the token:
+relation_select_copy_token = Copy token
+relation_select_api_token = API Token
+relation_select_token_description = This token is only required if the API is to be called from the frontend (e.g. for custom JavaScript implementations). It is not required in the backend.
+relation_select_search_placeholder = Search...
+relation_select_selected_items = Selected items
+relation_select_error_loading = Error loading data

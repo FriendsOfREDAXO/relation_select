@@ -4,6 +4,8 @@ namespace FriendsOfRedaxo\RelationSelect;
 
 use rex_api_exception;
 use rex_api_function;
+use rex_backend_login;
+use rex_config;
 use rex_sql;
 use rex_sql_exception;
 
@@ -13,6 +15,14 @@ class RelationSelect extends rex_api_function
 
     function execute()
     {
+        // Security Check: Allow access if backend user is logged in OR valid token is provided
+        $token = rex_get('token', 'string');
+        $configuredToken = (string) rex_config::get('relation_select', 'api_token', '');
+        
+        if (!rex_backend_login::hasSession() && ($configuredToken === '' || !hash_equals($configuredToken, $token))) {
+             throw new rex_api_exception('Access denied');
+        }
+
         $table = rex_get('table', 'string');
         $valueField = rex_get('value_field', 'string');
         $labelField = rex_get('label_field', 'string');

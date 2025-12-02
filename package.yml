@@ -1,7 +1,11 @@
 package: relation_select
-version: '1.0.1'
+version: '1.1.0'
 author: Your Name
 supportpage: https://github.com/your/repo
+
+page:
+    title: Relation Select
+    icon: rex-icon fa-exchange
 
 requires:
     redaxo: '^5.17'

@@ -137,3 +137,52 @@ Der `dbob` Parameter bestimmt die Sortierung der Einträge.
 
 MIT License - siehe [LICENSE.md](LICENSE.md)
 
+## API Token (Frontend-Zugriff)
+
+Das AddOn verwendet einen API-Token, um den Zugriff auf die Daten vom Frontend aus zu schützen. 
+
+**Wichtig:** Dieser Token wird **nur** benötigt, wenn Sie die API-Daten im Frontend verwenden möchten (z.B. für eigene Formulare oder dynamische Inhalte). Für die Verwendung im REDAXO-Backend ist keine Konfiguration nötig.
+
+### Token anzeigen
+Der aktuelle Token kann im REDAXO-Backend unter `AddOns > Relation Select` eingesehen werden.
+
+### Token erneuern
+Um einen neuen Token zu generieren, kann folgender PHP-Code ausgeführt werden (z.B. in der REDAXO-Konsole):
+
+```php
+// Neuen Token generieren und speichern
+rex_config::set('relation_select', 'api_token', bin2hex(random_bytes(32)));
+```
+
+Alternativ kann das AddOn re-installiert werden, nachdem der Token aus der Konfiguration gelöscht wurde:
+
+```php
+// Token löschen (wird bei Re-Installation neu erstellt)
+rex_config::remove('relation_select', 'api_token');
+```
+
+### Verwendung im Frontend (Custom JavaScript)
+
+Das mitgelieferte JavaScript (`relation_select.js`) ist für die Verwendung im Backend optimiert. Wenn Sie die Funktionalität im Frontend nutzen möchten, müssen Sie eine eigene JavaScript-Implementierung schreiben, die die API anspricht.
+
+Der Aufruf erfolgt dabei analog zum Backend, jedoch muss zusätzlich der Token übergeben werden:
+
+`index.php?rex-api-call=relation_select&token=DEIN_TOKEN&table=rex_article&...`
+
+Beispiel für einen Fetch-Call:
+
+```javascript
+const params = new URLSearchParams({
+    'rex-api-call': 'relation_select',
+    'token': 'HIER_DEN_TOKEN_EINSETZEN',
+    'table': 'rex_article',
+    'value_field': 'id',
+    'label_field': 'name'
+});
+
+fetch('index.php?' + params.toString())
+    .then(response => response.json())
+    .then(data => console.log(data));
+```
+
+
