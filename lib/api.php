@@ -95,6 +95,9 @@ class RelationSelect extends rex_api_function
             $options = $sql->getArray($query, $params);
             
             header('Content-Type: application/json');
+            header('Cache-Control: no-cache, no-store, must-revalidate');
+            header('Pragma: no-cache');
+            header('Expires: 0');
             echo json_encode($options);
             exit;
             
