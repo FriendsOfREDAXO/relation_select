@@ -92,7 +92,9 @@ class RelationSelect extends rex_api_function
         }
 
         try {
-            $options = $sql->getArray($query, $params);
+            // Always create fresh SQL instance to avoid cached results
+            $freshSql = rex_sql::factory();
+            $options = $freshSql->getArray($query, $params);
             
             header('Content-Type: application/json');
             header('Cache-Control: no-cache, no-store, must-revalidate');

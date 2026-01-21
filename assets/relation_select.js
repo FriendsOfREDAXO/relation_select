@@ -91,6 +91,9 @@
                 params.append('token', config.token);
             }
 
+            // Add timestamp cache buster
+            params.append('_t', Date.now());
+
             const url = 'index.php?' + params.toString();
             
             // Load data
