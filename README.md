@@ -4,25 +4,38 @@ Ermöglicht die Auswahl und Sortierung verknüpfter Datensätze mit erweiterten 
 
 ## Features
 
-- Benutzerfreundliche Oberfläche zum Auswählen und Sortieren von Datensätzen
-- Flexible Filtermöglichkeiten mit einer vereinfachten Syntax
-- Durchsuchbare Liste verfügbarer Einträge
-- Drag & Drop Sortierung der ausgewählten Einträge
-- Unterstützung für Meta Infos
-- Automatische Datumswerte (now, today)
-- Flexible Label-Gestaltung durch Feldverknüpfungen
+- 🎯 Benutzerfreundliche Oberfläche zum Auswählen und Sortieren von Datensätzen
+- 🔍 Durchsuchbare Liste verfügbarer Einträge mit Debounce-Optimierung
+- 🎨 Drag & Drop Sortierung der ausgewählten Einträge
+- 🔒 Sichere API mit XSS-Schutz und Type Safety
+- 📱 Responsive Design für mobile Geräte
+- ♿ Accessibility-optimiert (ARIA-Labels, Keyboard-Navigation)
+- 🚀 Performance-optimiert (Document Fragments, debounced Search)
+- 🔧 Flexible Filtermöglichkeiten mit vereinfachter Syntax
+- 📅 Automatische Datumswerte (now, today)
+- 🏷️ Flexible Label-Gestaltung durch Feldverknüpfungen
+- 🔗 Unterstützung für Meta Infos und YForm
 
 ## Installation
 
 1. Im REDAXO Installer das AddOn "relation_select" herunterladen
 2. AddOn installieren und aktivieren
+3. Bei Bedarf: API-Token für Frontend-Nutzung notieren
+
+## Anforderungen
+
+- REDAXO >= 5.17
+- PHP >= 8.2
 
 ## Anwendung
 
 ### Basis-Konfiguration
+
+Das AddOn wird automatisch initialisiert, sobald ein Input-Feld das Attribut `data-relation-config` hat:
+
 ```html
-<input type="text" name="my_field" 
-    data-relation-mode="modal" 
+<input type="text" 
+    name="my_field" 
     data-relation-config='{
         "table": "rex_article",
         "valueField": "id",
@@ -31,13 +44,40 @@ Ermöglicht die Auswahl und Sortierung verknüpfter Datensätze mit erweiterten 
 >
 ```
 
-### Beispiel für eine Relation in Yform
+**Hinweis:** Das Attribut `data-relation-mode` ist optional und wird aktuell nicht verwendet. Die Widget-Darstellung erfolgt immer inline.
 
-Das Feld wird als Textfeld mit dem Namen der Relation angelegt (z.B. autoren_id).
+### Beispiel für eine Relation in YForm
 
-Bei den individuellen Attributen des Feldes kann dann folgendes eingetragen werden:
+Das Feld wird als **Textfeld** mit dem Namen der Relation angelegt (z.B. `autoren_id`).
 
-`{"data-relation-mode":"modal","data-relation-config":"{\"table\": \"rex_autoren\",\"valueField\": \"id\",\"labelField\": \"anrede|vorname|nachname\"}"}`
+Bei den **individuellen Attributen** des Feldes wird folgendes eingetragen:
+
+```json
+{
+    "data-relation-config": "{
+        \"table\": \"rex_autoren\",
+        \"valueField\": \"id\",
+        \"labelField\": \"vorname|nachname\"
+    }"
+}
+```
+
+**Wichtig:** In YForm muss das JSON doppelt escaped werden (siehe Beispiel).
+
+### Beispiel mit Filtern und Sortierung
+
+```html
+<input type="text" 
+    name="authors" 
+    data-relation-config='{
+        "table": "rex_authors",
+        "valueField": "id",
+        "labelField": "firstname|lastname",
+        "dbw": "status = 1, published != 0",
+        "dbob": "lastname,ASC,firstname,ASC"
+    }'
+>
+```
 
 ### Label-Syntax
 
@@ -120,6 +160,56 @@ Der `dbob` Parameter bestimmt die Sortierung der Einträge.
 "dbob": "priority,DESC,name,ASC"    // Nach Priorität, bei gleicher alphabetisch
 ```
 
+
+## Sicherheit
+
+### XSS-Schutz
+Alle Ausgaben (Labels, Values) werden automatisch escaped, um Cross-Site-Scripting (XSS) Angriffe zu verhindern.
+
+### SQL-Injection-Schutz
+Die API verwendet Prepared Statements und Parameter-Binding für alle Datenbankabfragen. Tabellenamen und Feldnamen werden mit `rex_sql::escapeIdentifier()` escaped.
+
+### Type Safety
+Das AddOn ist vollständig mit Rexstan validiert und verwendet strikte Typ-Deklarationen für alle Methoden und Parameter.
+
+### API Token
+Für Frontend-Zugriffe ist ein API-Token erforderlich. Backend-Zugriffe sind durch die REDAXO-Session geschützt.
+
+## Performance
+
+- **Document Fragments**: DOM-Manipulationen werden gebündelt für minimale Reflows
+- **Debounced Search**: Suchfunktion mit 200ms Verzögerung für bessere Performance
+- **Cache Control**: API-Responses werden nicht gecacht für aktuelle Daten
+- **Optimized Queries**: SQL-Queries mit `DISTINCT` und optimierten WHERE/ORDER-Klauseln
+
+## Barrierefreiheit
+
+- ARIA-Labels für alle interaktiven Elemente
+- Keyboard-Navigation unterstützt
+- Focus-States für bessere Sichtbarkeit
+- Semantisches HTML
+
+## Theme-Support
+
+Das AddOn unterstützt alle REDAXO-Themes:
+
+### Light Theme (Standard)
+Helle Farben und hoher Kontrast für optimale Lesbarkeit
+
+### Dark Theme
+- Explizit: `body.rex-theme-dark`
+- Auto-Modus: `@media (prefers-color-scheme: dark)`
+- Verwendet REDAXO's offizielle Dark-Theme-Farbpalette
+- Farben: `#202b35` (Background), `#409be4` (Links), `rgba(255, 255, 255, 0.75)` (Text)
+
+### Auto Theme
+Automatische Erkennung der System-Präferenz mit Fallback auf Light Theme
+
+**CSS Custom Properties** mit Fallbacks sorgen für maximale Kompatibilität:
+```css
+color: var(--rex-text-color, #333);
+background: var(--rex-panel-bg, #fff);
+```
 
 ## Autor
 

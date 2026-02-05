@@ -1,3 +1,5 @@
+/* Relation Select AddOn Styles */
+
 .relation-select-widget {
     display: flex;
     gap: 20px;
@@ -7,18 +9,21 @@
 .relation-select-available,
 .relation-select-selected {
     flex: 1;
-    border: 1px solid #c1c9d4;
+    border: 1px solid var(--rex-border-color, #c1c9d4);
     border-radius: 4px;
     padding: 10px;
+    background: var(--rex-panel-bg, #fff);
 }
 
 .relation-select-search {
     margin-bottom: 10px;
+    width: 100%;
 }
 
 .relation-select-header {
     margin-bottom: 10px;
     font-weight: bold;
+    color: var(--rex-text-color, #333);
 }
 
 .relation-select-list {
@@ -32,11 +37,16 @@
 .relation-select-list li {
     display: flex;
     align-items: center;
-    padding: 5px;
-    border: 1px solid #e9ecef;
+    padding: 8px;
+    border: 1px solid var(--rex-border-light, #e9ecef);
     margin-bottom: 5px;
     border-radius: 3px;
-    background: #fff;
+    background: var(--rex-panel-bg, #fff);
+    transition: background-color 0.2s;
+}
+
+.relation-select-list li:hover {
+    background-color: var(--rex-hover-bg, #f8f9fa);
 }
 
 .relation-select-list li:last-child {
@@ -46,7 +56,313 @@
 .relation-select-list .title {
     flex: 1;
     margin: 0 10px;
+    word-break: break-word;
+    color: var(--rex-text-color, inherit);
 }
+
+.relation-select-list .handle {
+    cursor: move;
+    color: var(--rex-text-muted, #6c757d);
+    margin-right: 5px;
+}
+
+.relation-select-list .handle:hover {
+    color: var(--rex-text-color, #495057);
+}
+
+.relation-select-list .btn-link {
+    padding: 2px 8px;
+    color: var(--rex-link-color, #007bff);
+}
+
+.relation-select-list .btn-link:hover {
+    color: var(--rex-link-hover-color, #0056b3);
+}
+
+.relation-select-list .add-item i {
+    color: var(--rex-success-color, #28a745);
+}
+
+.relation-select-list .remove-item i {
+    color: var(--rex-danger-color, #dc3545);
+}
+
+.relation-select-list .error {
+    color: var(--rex-danger-color, #dc3545);
+    font-style: italic;
+    padding: 10px;
+    text-align: center;
+}
+
+/* Accessibility improvements */
+.relation-select-list li:focus-within {
+    outline: 2px solid var(--rex-link-color, #007bff);
+    outline-offset: 2px;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .relation-select-widget {
+        flex-direction: column;
+    }
+}
+
+/* ============================================================================
+   Modal Mode
+   ========================================================================== */
+
+.relation-select-open-modal {
+    margin-top: 5px;
+}
+
+.relation-select-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.relation-select-modal.active {
+    display: flex;
+}
+
+.relation-select-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+}
+
+.relation-select-modal-dialog {
+    position: relative;
+    background: var(--rex-panel-bg, #fff);
+    border-radius: 8px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    max-width: 90vw;
+    width: 900px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    animation: modalSlideIn 0.2s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.relation-select-modal-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--rex-border-color, #e0e0e0);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.relation-select-modal-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--rex-text-color, #333);
+}
+
+.relation-select-modal-close {
+    background: none;
+    border: none;
+    font-size: 28px;
+    line-height: 1;
+    color: var(--rex-text-muted, #999);
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.relation-select-modal-close:hover {
+    background-color: var(--rex-hover-bg, #f0f0f0);
+    color: var(--rex-text-color, #333);
+}
+
+.relation-select-modal-body {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.relation-select-modal-body .relation-select-widget {
+    margin: 0;
+}
+
+.relation-select-modal-footer {
+    padding: 15px 20px;
+    border-top: 1px solid var(--rex-border-color, #e0e0e0);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.relation-select-modal-footer .btn {
+    padding: 8px 16px;
+}
+
+/* Prevent body scroll when modal is open */
+body.relation-select-modal-open {
+    overflow: hidden;
+}
+
+/* Mobile modal adjustments */
+@media (max-width: 768px) {
+    .relation-select-modal-dialog {
+        width: 95vw;
+        max-height: 95vh;
+    }
+    
+    .relation-select-modal-header,
+    .relation-select-modal-body,
+    .relation-select-modal-footer {
+        padding: 12px 15px;
+    }
+}
+
+/* ============================================================================
+   Dark Theme Support
+   ========================================================================== */
+
+/* Apply dark theme when explicitly set */
+body.rex-theme-dark .relation-select-available,
+body.rex-theme-dark .relation-select-selected {
+    border-color: #26323f;
+    background: #202b35;
+}
+
+body.rex-theme-dark .relation-select-header {
+    color: rgba(255, 255, 255, 0.75);
+}
+
+body.rex-theme-dark .relation-select-list li {
+    border-color: #26323f;
+    background: #202b35;
+}
+
+body.rex-theme-dark .relation-select-list li:hover {
+    background-color: #26323f;
+}
+
+body.rex-theme-dark .relation-select-list .title {
+    color: rgba(255, 255, 255, 0.75);
+}
+
+body.rex-theme-dark .relation-select-list .handle {
+    color: rgba(255, 255, 255, 0.45);
+}
+
+body.rex-theme-dark .relation-select-list .handle:hover {
+    color: rgba(255, 255, 255, 0.75);
+}
+
+body.rex-theme-dark .relation-select-list .btn-link {
+    color: #409be4;
+}
+
+body.rex-theme-dark .relation-select-list .btn-link:hover {
+    color: #7abaec;
+}
+
+body.rex-theme-dark .relation-select-list .add-item i {
+    color: #0d6a38;
+}
+
+body.rex-theme-dark .relation-select-list .remove-item i {
+    color: #801919;
+}
+
+body.rex-theme-dark .relation-select-list .error {
+    color: #801919;
+}
+
+body.rex-theme-dark .relation-select-list li:focus-within {
+    outline-color: #409be4;
+}
+
+/* Apply dark theme based on system preference (auto mode) */
+@media (prefers-color-scheme: dark) {
+    body:not(.rex-theme-light) .relation-select-available,
+    body:not(.rex-theme-light) .relation-select-selected {
+        border-color: #26323f;
+        background: #202b35;
+    }
+
+    body:not(.rex-theme-light) .relation-select-header {
+        color: rgba(255, 255, 255, 0.75);
+    }
+
+    body:not(.rex-theme-light) .relation-select-list li {
+        border-color: #26323f;
+        background: #202b35;
+    }
+
+    body:not(.rex-theme-light) .relation-select-list li:hover {
+        background-color: #26323f;
+    }
+
+    body:not(.rex-theme-light) .relation-select-list .title {
+        color: rgba(255, 255, 255, 0.75);
+    }
+
+    body:not(.rex-theme-light) .relation-select-list .handle {
+        color: rgba(255, 255, 255, 0.45);
+    }
+
+    body:not(.rex-theme-light) .relation-select-list .handle:hover {
+        color: rgba(255, 255, 255, 0.75);
+    }
+
+    body:not(.rex-theme-light) .relation-select-list .btn-link {
+        color: #409be4;
+    }
+
+    body:not(.rex-theme-light) .relation-select-list .btn-link:hover {
+        color: #7abaec;
+    }
+
+    body:not(.rex-theme-light) .relation-select-list .add-item i {
+        color: #0d6a38;
+    }
+
+    body:not(.rex-theme-light) .relation-select-list .remove-item i {
+        color: #801919;
+    }
+
+    body:not(.rex-theme-light) .relation-select-list .error {
+        color: #801919;
+    }
+
+    body:not(.rex-theme-light) .relation-select-list li:focus-within {
+        outline-color: #409be4;
+    }
+}
+
+
+
 
 .relation-select-list .handle {
     cursor: move;

@@ -35,11 +35,13 @@
             const input = this;
             
             // Prevent double initialization
-            if ($(input).next('.relation-select-widget').length > 0) {
+            if ($(input).next('.relation-select-widget').length > 0 || $(input).data('relation-initialized')) {
                 return;
             }
+            $(input).data('relation-initialized', true);
 
             let config;
+            const mode = input.dataset.relationMode || 'inline'; // 'inline' or 'modal'
             
             try {
                 config = JSON.parse(input.dataset.relationConfig || '{}');
@@ -68,7 +70,65 @@
                 </div>
             `);
 
-            $(input).hide().after(widget);
+            if (mode === 'modal') {
+                // Modal mode: Create button and modal overlay
+                const button = $(`
+                    <button type="button" class="btn btn-default relation-select-open-modal">
+                        <i class="fa fa-list"></i> Auswählen
+                    </button>
+                `);
+                
+                const modal = $(`
+                    <div class="relation-select-modal">
+                        <div class="relation-select-modal-overlay"></div>
+                        <div class="relation-select-modal-dialog">
+                            <div class="relation-select-modal-header">
+                                <h4 class="relation-select-modal-title">Einträge auswählen</h4>
+                                <button type="button" class="relation-select-modal-close">&times;</button>
+                            </div>
+                            <div class="relation-select-modal-body"></div>
+                            <div class="relation-select-modal-footer">
+                                <button type="button" class="btn btn-default relation-select-modal-cancel">Abbrechen</button>
+                                <button type="button" class="btn btn-primary relation-select-modal-apply">Übernehmen</button>
+                            </div>
+                        </div>
+                    </div>
+                `);
+                
+                modal.find('.relation-select-modal-body').append(widget);
+                $('body').append(modal);
+                $(input).after(button);
+                
+                // Open modal
+                button.on('click', function() {
+                    modal.addClass('active');
+                    $('body').addClass('relation-select-modal-open');
+                });
+                
+                // Close modal
+                modal.find('.relation-select-modal-close, .relation-select-modal-cancel, .relation-select-modal-overlay').on('click', function() {
+                    modal.removeClass('active');
+                    $('body').removeClass('relation-select-modal-open');
+                });
+                
+                // Apply selection
+                modal.find('.relation-select-modal-apply').on('click', function() {
+                    modal.removeClass('active');
+                    $('body').removeClass('relation-select-modal-open');
+                });
+                
+                // ESC key to close
+                $(document).on('keydown.relation-select-modal', function(e) {
+                    if (e.key === 'Escape' && modal.hasClass('active')) {
+                        modal.removeClass('active');
+                        $('body').removeClass('relation-select-modal-open');
+                    }
+                });
+                
+            } else {
+                // Inline mode: Insert widget directly after input
+                $(input).hide().after(widget);
+            }
 
             // Build API URL using URLSearchParams for proper encoding
             const params = new URLSearchParams({
@@ -98,30 +158,44 @@
             
             // Load data
             fetch(url, {
-                cache: 'no-store'
+                cache: 'no-store',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
             })
                 .then(response => {
                     if (!response.ok) {
-                        throw new Error('Network response was not ok');
+                        throw new Error(`HTTP error! status: ${response.status}`);
                     }
                     return response.json();
                 })
                 .then(data => {
+                    if (!Array.isArray(data)) {
+                        throw new Error('Invalid data format received');
+                    }
+                    
                     const selectedValues = input.value.split(',').filter(v => v);
                     const availableList = widget.find('.available-list');
                     const selectedList = widget.find('.selected-list');
                     
+                    // Create document fragment for better performance
+                    const availableFragment = document.createDocumentFragment();
+                    const selectedFragment = document.createDocumentFragment();
+                    
                     // Fill available items
                     data.forEach(item => {
                         if (!selectedValues.includes(item.value.toString())) {
-                            availableList.append(`
-                                <li data-value="${item.value}">
-                                    <span class="title">${item.label}</span>
-                                    <button type="button" class="btn btn-link add-item">
+                            const escapedValue = $('<div>').text(item.value).html();
+                            const escapedLabel = $('<div>').text(item.label).html();
+                            const li = $(`
+                                <li data-value="${escapedValue}">
+                                    <span class="title">${escapedLabel}</span>
+                                    <button type="button" class="btn btn-link add-item" aria-label="Hinzufügen">
                                         <i class="fa fa-plus"></i>
                                     </button>
                                 </li>
-                            `);
+                            `)[0];
+                            availableFragment.appendChild(li);
                         }
                     });
 
@@ -129,17 +203,24 @@
                     selectedValues.forEach(value => {
                         const item = data.find(i => i.value.toString() === value);
                         if (item) {
-                            selectedList.append(`
-                                <li data-value="${item.value}">
-                                    <i class="fa fa-bars handle"></i>
-                                    <span class="title">${item.label}</span>
-                                    <button type="button" class="btn btn-link remove-item">
+                            const escapedValue = $('<div>').text(item.value).html();
+                            const escapedLabel = $('<div>').text(item.label).html();
+                            const li = $(`
+                                <li data-value="${escapedValue}">
+                                    <i class="fa fa-bars handle" aria-label="Sortieren"></i>
+                                    <span class="title">${escapedLabel}</span>
+                                    <button type="button" class="btn btn-link remove-item" aria-label="Entfernen">
                                         <i class="fa fa-minus"></i>
                                     </button>
                                 </li>
-                            `);
+                            `)[0];
+                            selectedFragment.appendChild(li);
                         }
                     });
+                    
+                    // Append fragments to DOM (single reflow)
+                    availableList[0].appendChild(availableFragment);
+                    selectedList[0].appendChild(selectedFragment);
 
                     // Make selected list sortable
                     if (typeof Sortable !== 'undefined') {
@@ -152,13 +233,17 @@
                         console.warn('SortableJS not found. Sorting disabled.');
                     }
 
-                    // Search functionality
+                    // Search functionality with debounce for better performance
+                    let searchTimeout;
                     widget.find('.relation-select-search').on('input', function() {
+                        clearTimeout(searchTimeout);
                         const search = this.value.toLowerCase();
-                        availableList.find('li').each(function() {
-                            const text = $(this).find('.title').text().toLowerCase();
-                            $(this).toggle(text.includes(search));
-                        });
+                        searchTimeout = setTimeout(() => {
+                            availableList.find('li').each(function() {
+                                const text = $(this).find('.title').text().toLowerCase();
+                                $(this).toggle(text.includes(search));
+                            });
+                        }, 200);
                     });
 
                     // Add item
@@ -167,10 +252,13 @@
                         const value = li.data('value');
                         const title = li.find('.title').text();
                         
+                        const escapedValue = $('<div>').text(value).html();
+                        const escapedTitle = $('<div>').text(title).html();
+                        
                         selectedList.append(`
-                            <li data-value="${value}">
+                            <li data-value="${escapedValue}">
                                 <i class="fa fa-bars handle"></i>
-                                <span class="title">${title}</span>
+                                <span class="title">${escapedTitle}</span>
                                 <button type="button" class="btn btn-link remove-item">
                                     <i class="fa fa-minus"></i>
                                 </button>
@@ -186,9 +274,12 @@
                         const value = li.data('value');
                         const title = li.find('.title').text();
                         
+                        const escapedValue = $('<div>').text(value).html();
+                        const escapedTitle = $('<div>').text(title).html();
+                        
                         availableList.append(`
-                            <li data-value="${value}">
-                                <span class="title">${title}</span>
+                            <li data-value="${escapedValue}">
+                                <span class="title">${escapedTitle}</span>
                                 <button type="button" class="btn btn-link add-item">
                                     <i class="fa fa-plus"></i>
                                 </button>

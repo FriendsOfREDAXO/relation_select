@@ -19,4 +19,3 @@ if (!rex_config::has('relation_select', 'api_token')) {
 
     $addon->setProperty('successmsg', $message);
 }
-
