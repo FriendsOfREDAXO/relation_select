@@ -1,5 +1,12 @@
 /* Relation Select AddOn Styles */
 
+/* SVG Icons */
+.relation-select-icon {
+    display: inline-block;
+    vertical-align: middle;
+    fill: currentColor;
+}
+
 .relation-select-widget {
     display: flex;
     gap: 20px;
@@ -42,11 +49,24 @@
     margin-bottom: 5px;
     border-radius: 3px;
     background: var(--rex-panel-bg, #fff);
-    transition: background-color 0.2s;
+    transition: background-color 0.2s, border-color 0.2s;
 }
 
 .relation-select-list li:hover {
     background-color: var(--rex-hover-bg, #f8f9fa);
+}
+
+/* Available items are clickable */
+.relation-select-item-available {
+    cursor: pointer;
+}
+
+.relation-select-item-available:hover {
+    border-color: var(--rex-link-color, #007bff);
+}
+
+.relation-select-item-available .title {
+    cursor: pointer;
 }
 
 .relation-select-list li:last-child {
@@ -64,6 +84,7 @@
     cursor: move;
     color: var(--rex-text-muted, #6c757d);
     margin-right: 5px;
+    flex-shrink: 0;
 }
 
 .relation-select-list .handle:hover {
@@ -73,17 +94,18 @@
 .relation-select-list .btn-link {
     padding: 2px 8px;
     color: var(--rex-link-color, #007bff);
+    flex-shrink: 0;
 }
 
 .relation-select-list .btn-link:hover {
     color: var(--rex-link-hover-color, #0056b3);
 }
 
-.relation-select-list .add-item i {
+.relation-select-list .add-item .relation-select-icon {
     color: var(--rex-success-color, #28a745);
 }
 
-.relation-select-list .remove-item i {
+.relation-select-list .remove-item .relation-select-icon {
     color: var(--rex-danger-color, #dc3545);
 }
 
@@ -113,6 +135,27 @@
 
 .relation-select-open-modal {
     margin-top: 5px;
+    position: relative;
+}
+
+.relation-select-badge {
+    display: inline-block;
+    min-width: 20px;
+    padding: 3px 7px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--rex-text-muted, #999);
+    background-color: var(--rex-border-light, #e9ecef);
+    border-radius: 10px;
+    margin-left: 8px;
+    transition: all 0.2s ease;
+}
+
+.relation-select-badge.has-items {
+    color: #fff;
+    background-color: var(--rex-link-color, #007bff);
+    transform: scale(1.1);
 }
 
 .relation-select-modal {
@@ -303,6 +346,43 @@ body.rex-theme-dark .relation-select-list li:focus-within {
     outline-color: #409be4;
 }
 
+body.rex-theme-dark .relation-select-modal-dialog {
+    background: #202b35;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+}
+
+body.rex-theme-dark .relation-select-modal-header,
+body.rex-theme-dark .relation-select-modal-footer {
+    border-color: #26323f;
+}
+
+body.rex-theme-dark .relation-select-modal-title {
+    color: rgba(255, 255, 255, 0.75);
+}
+
+body.rex-theme-dark .relation-select-modal-close {
+    color: rgba(255, 255, 255, 0.45);
+}
+
+body.rex-theme-dark .relation-select-modal-close:hover {
+    background-color: #26323f;
+    color: rgba(255, 255, 255, 0.75);
+}
+
+body.rex-theme-dark .relation-select-modal-overlay {
+    background: rgba(0, 0, 0, 0.7);
+}
+
+body.rex-theme-dark .relation-select-badge {
+    color: rgba(255, 255, 255, 0.45);
+    background-color: #26323f;
+}
+
+body.rex-theme-dark .relation-select-badge.has-items {
+    color: #fff;
+    background-color: #409be4;
+}
+
 /* Apply dark theme based on system preference (auto mode) */
 @media (prefers-color-scheme: dark) {
     body:not(.rex-theme-light) .relation-select-available,
@@ -358,6 +438,43 @@ body.rex-theme-dark .relation-select-list li:focus-within {
 
     body:not(.rex-theme-light) .relation-select-list li:focus-within {
         outline-color: #409be4;
+    }
+
+    body:not(.rex-theme-light) .relation-select-modal-dialog {
+        background: #202b35;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+    }
+
+    body:not(.rex-theme-light) .relation-select-modal-header,
+    body:not(.rex-theme-light) .relation-select-modal-footer {
+        border-color: #26323f;
+    }
+
+    body:not(.rex-theme-light) .relation-select-modal-title {
+        color: rgba(255, 255, 255, 0.75);
+    }
+
+    body:not(.rex-theme-light) .relation-select-modal-close {
+        color: rgba(255, 255, 255, 0.45);
+    }
+
+    body:not(.rex-theme-light) .relation-select-modal-close:hover {
+        background-color: #26323f;
+        color: rgba(255, 255, 255, 0.75);
+    }
+
+    body:not(.rex-theme-light) .relation-select-modal-overlay {
+        background: rgba(0, 0, 0, 0.7);
+    }
+
+    body:not(.rex-theme-light) .relation-select-badge {
+        color: rgba(255, 255, 255, 0.45);
+        background-color: #26323f;
+    }
+
+    body:not(.rex-theme-light) .relation-select-badge.has-items {
+        color: #fff;
+        background-color: #409be4;
     }
 }
 

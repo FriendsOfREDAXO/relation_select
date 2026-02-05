@@ -72,9 +72,14 @@
 
             if (mode === 'modal') {
                 // Modal mode: Create button and modal overlay
+                const selectedCount = input.value ? input.value.split(',').filter(v => v).length : 0;
                 const button = $(`
                     <button type="button" class="btn btn-default relation-select-open-modal">
-                        <i class="fa fa-list"></i> Auswählen
+                        <svg class="relation-select-icon" viewBox="0 0 24 24" width="14" height="14">
+                            <path fill="currentColor" d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>
+                        </svg>
+                        Auswählen
+                        <span class="relation-select-badge">${selectedCount}</span>
                     </button>
                 `);
                 
@@ -84,7 +89,11 @@
                         <div class="relation-select-modal-dialog">
                             <div class="relation-select-modal-header">
                                 <h4 class="relation-select-modal-title">Einträge auswählen</h4>
-                                <button type="button" class="relation-select-modal-close">&times;</button>
+                                <button type="button" class="relation-select-modal-close">
+                                    <svg class="relation-select-icon" viewBox="0 0 24 24" width="20" height="20">
+                                        <path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                                    </svg>
+                                </button>
                             </div>
                             <div class="relation-select-modal-body"></div>
                             <div class="relation-select-modal-footer">
@@ -97,7 +106,21 @@
                 
                 modal.find('.relation-select-modal-body').append(widget);
                 $('body').append(modal);
-                $(input).after(button);
+                
+                // Hide input and show button
+                $(input).hide().after(button);
+                
+                // Update badge count function
+                const updateBadge = function() {
+                    const count = input.value ? input.value.split(',').filter(v => v).length : 0;
+                    const badge = button.find('.relation-select-badge');
+                    badge.text(count);
+                    if (count > 0) {
+                        badge.addClass('has-items');
+                    } else {
+                        badge.removeClass('has-items');
+                    }
+                };
                 
                 // Open modal
                 button.on('click', function() {
@@ -111,10 +134,11 @@
                     $('body').removeClass('relation-select-modal-open');
                 });
                 
-                // Apply selection
+                // Apply selection and update badge
                 modal.find('.relation-select-modal-apply').on('click', function() {
                     modal.removeClass('active');
                     $('body').removeClass('relation-select-modal-open');
+                    updateBadge();
                 });
                 
                 // ESC key to close
@@ -124,6 +148,9 @@
                         $('body').removeClass('relation-select-modal-open');
                     }
                 });
+                
+                // Store updateBadge function for later use
+                $(input).data('updateBadge', updateBadge);
                 
             } else {
                 // Inline mode: Insert widget directly after input
@@ -188,10 +215,12 @@
                             const escapedValue = $('<div>').text(item.value).html();
                             const escapedLabel = $('<div>').text(item.label).html();
                             const li = $(`
-                                <li data-value="${escapedValue}">
+                                <li data-value="${escapedValue}" class="relation-select-item-available">
                                     <span class="title">${escapedLabel}</span>
                                     <button type="button" class="btn btn-link add-item" aria-label="Hinzufügen">
-                                        <i class="fa fa-plus"></i>
+                                        <svg class="relation-select-icon" viewBox="0 0 24 24" width="16" height="16">
+                                            <path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                                        </svg>
                                     </button>
                                 </li>
                             `)[0];
@@ -207,10 +236,19 @@
                             const escapedLabel = $('<div>').text(item.label).html();
                             const li = $(`
                                 <li data-value="${escapedValue}">
-                                    <i class="fa fa-bars handle" aria-label="Sortieren"></i>
+                                    <svg class="relation-select-icon handle" viewBox="0 0 24 24" width="16" height="16" aria-label="Sortieren">
+                                        <circle cx="9" cy="5" r="1.5" fill="currentColor"/>
+                                        <circle cx="9" cy="12" r="1.5" fill="currentColor"/>
+                                        <circle cx="9" cy="19" r="1.5" fill="currentColor"/>
+                                        <circle cx="15" cy="5" r="1.5" fill="currentColor"/>
+                                        <circle cx="15" cy="12" r="1.5" fill="currentColor"/>
+                                        <circle cx="15" cy="19" r="1.5" fill="currentColor"/>
+                                    </svg>
                                     <span class="title">${escapedLabel}</span>
                                     <button type="button" class="btn btn-link remove-item" aria-label="Entfernen">
-                                        <i class="fa fa-minus"></i>
+                                        <svg class="relation-select-icon" viewBox="0 0 24 24" width="16" height="16">
+                                            <path fill="currentColor" d="M19 13H5v-2h14v2z"/>
+                                        </svg>
                                     </button>
                                 </li>
                             `)[0];
@@ -246,8 +284,17 @@
                         }, 200);
                     });
 
-                    // Add item
-                    widget.on('click', '.add-item', function() {
+                    // Add item - Click on entire row OR button
+                    widget.on('click', '.relation-select-item-available', function(e) {
+                        // Don't trigger if clicking on button directly (button will handle it)
+                        if ($(e.target).closest('.add-item').length > 0) {
+                            return;
+                        }
+                        $(this).find('.add-item').click();
+                    });
+                    
+                    widget.on('click', '.add-item', function(e) {
+                        e.stopPropagation(); // Prevent double triggering
                         const li = $(this).closest('li');
                         const value = li.data('value');
                         const title = li.find('.title').text();
@@ -257,10 +304,19 @@
                         
                         selectedList.append(`
                             <li data-value="${escapedValue}">
-                                <i class="fa fa-bars handle"></i>
+                                <svg class="relation-select-icon handle" viewBox="0 0 24 24" width="16" height="16">
+                                    <circle cx="9" cy="5" r="1.5" fill="currentColor"/>
+                                    <circle cx="9" cy="12" r="1.5" fill="currentColor"/>
+                                    <circle cx="9" cy="19" r="1.5" fill="currentColor"/>
+                                    <circle cx="15" cy="5" r="1.5" fill="currentColor"/>
+                                    <circle cx="15" cy="12" r="1.5" fill="currentColor"/>
+                                    <circle cx="15" cy="19" r="1.5" fill="currentColor"/>
+                                </svg>
                                 <span class="title">${escapedTitle}</span>
                                 <button type="button" class="btn btn-link remove-item">
-                                    <i class="fa fa-minus"></i>
+                                    <svg class="relation-select-icon" viewBox="0 0 24 24" width="16" height="16">
+                                        <path fill="currentColor" d="M19 13H5v-2h14v2z"/>
+                                    </svg>
                                 </button>
                             </li>
                         `);
@@ -278,10 +334,12 @@
                         const escapedTitle = $('<div>').text(title).html();
                         
                         availableList.append(`
-                            <li data-value="${escapedValue}">
+                            <li data-value="${escapedValue}" class="relation-select-item-available">
                                 <span class="title">${escapedTitle}</span>
                                 <button type="button" class="btn btn-link add-item">
-                                    <i class="fa fa-plus"></i>
+                                    <svg class="relation-select-icon" viewBox="0 0 24 24" width="16" height="16">
+                                        <path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                                    </svg>
                                 </button>
                             </li>
                         `);
@@ -296,6 +354,12 @@
                         });
                         input.value = values.join(',');
                         $(input).trigger('change');
+                        
+                        // Update badge in modal mode
+                        const updateBadgeFn = $(input).data('updateBadge');
+                        if (updateBadgeFn && typeof updateBadgeFn === 'function') {
+                            updateBadgeFn();
+                        }
                     }
                 })
                 .catch(error => {

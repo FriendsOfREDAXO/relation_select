@@ -2,6 +2,19 @@
 
 ## Version 1.2.0 (2026-02-05)
 
+### ✨ Neue Features
+- **Modal-Modus**: Eigenes Modal-System für platzsparende Layouts
+  - `data-relation-mode="modal"` aktiviert Modal-Darstellung
+  - **Badge mit Anzahl** ausgewählter Einträge (live-Update)
+  - Badge ist grau bei 0, blau bei Auswahl
+  - Input-Feld wird ausgeblendet (nur Button sichtbar)
+  - Frontend-kompatibel (keine Bootstrap-Abhängigkeit)
+  - ESC-Taste zum Schließen
+  - Body-Scroll-Lock während Modal aktiv
+  - Smooth Animations mit Scale-Effekt
+- **Inline-Modus**: Standard-Darstellung (wie bisher)
+- **Dual-Mode-Support**: Frei wählbar per Attribut
+
 ### 🔒 Security
 - **XSS-Schutz**: Labels und Values werden jetzt korrekt escaped in JavaScript
 - **Type Safety**: Strikte Typ-Prüfungen für alle API-Parameter implementiert

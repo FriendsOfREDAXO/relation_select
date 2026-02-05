@@ -29,9 +29,12 @@ Ermöglicht die Auswahl und Sortierung verknüpfter Datensätze mit erweiterten 
 
 ## Anwendung
 
-### Basis-Konfiguration
+### Modi
 
-Das AddOn wird automatisch initialisiert, sobald ein Input-Feld das Attribut `data-relation-config` hat:
+Das AddOn unterstützt zwei Anzeigemodi:
+
+#### **Inline-Modus (Standard)**
+Widget wird direkt unterhalb des Input-Feldes angezeigt:
 
 ```html
 <input type="text" 
@@ -44,7 +47,36 @@ Das AddOn wird automatisch initialisiert, sobald ein Input-Feld das Attribut `da
 >
 ```
 
-**Hinweis:** Das Attribut `data-relation-mode` ist optional und wird aktuell nicht verwendet. Die Widget-Darstellung erfolgt immer inline.
+#### **Modal-Modus**
+Widget wird in einem Overlay-Dialog geöffnet (ideal für platzsparende Layouts und Frontend-Verwendung):
+
+```html
+<input type="text" 
+    name="my_field" 
+    data-relation-mode="modal"
+    data-relation-config='{
+        "table": "rex_article",
+        "valueField": "id",
+        "labelField": "name"
+    }'
+>
+```
+
+**Modal-Features:**
+- 🎯 Eigenes Modal-System (keine Bootstrap-Abhängigkeit)
+- � **Badge mit Anzahl** ausgewählter Einträge (live-Update)
+- 📱 Frontend-kompatibel
+- ⌨️ ESC-Taste zum Schließen
+- 🎨 Dark-Theme-Support
+- 📱 Responsive Design
+- 🔒 Body-Scroll-Lock während Modal offen ist
+- 💨 Smooth Animations
+
+**UX im Modal-Modus:**
+- Input-Feld wird ausgeblendet
+- Button zeigt Badge mit Anzahl der Auswahlen
+- Badge ist grau bei 0 Einträgen, blau bei Auswahl
+- Live-Update der Badge-Anzahl bei Änderungen
 
 ### Beispiel für eine Relation in YForm
 
@@ -52,8 +84,21 @@ Das Feld wird als **Textfeld** mit dem Namen der Relation angelegt (z.B. `autore
 
 Bei den **individuellen Attributen** des Feldes wird folgendes eingetragen:
 
+**Inline-Modus:**
 ```json
 {
+    "data-relation-config": "{
+        \"table\": \"rex_autoren\",
+        \"valueField\": \"id\",
+        \"labelField\": \"vorname|nachname\"
+    }"
+}
+```
+
+**Modal-Modus:**
+```json
+{
+    "data-relation-mode": "modal",
     "data-relation-config": "{
         \"table\": \"rex_autoren\",
         \"valueField\": \"id\",
@@ -69,6 +114,7 @@ Bei den **individuellen Attributen** des Feldes wird folgendes eingetragen:
 ```html
 <input type="text" 
     name="authors" 
+    data-relation-mode="modal"
     data-relation-config='{
         "table": "rex_authors",
         "valueField": "id",
