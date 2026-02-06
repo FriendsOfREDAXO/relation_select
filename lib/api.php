@@ -37,6 +37,7 @@ class RelationSelect extends rex_api_function
         $valueField = rex_get('value_field', 'string', '');
         $labelField = rex_get('label_field', 'string', '');
         $displayFields = rex_get('display_fields', 'string', ''); // Additional fields for color, badge, etc.
+        $clang = rex_get('clang', 'int', 0); // Language ID
         $dbWhere = rex_get('dbw', 'string', '');
         $dbOrderBy = rex_get('dbob', 'string', '');
 
@@ -72,6 +73,12 @@ class RelationSelect extends rex_api_function
         // Parse WHERE conditions
         $where = [];
         $params = [];
+        
+        // Add clang filter for multi-language tables (rex_article, rex_article_slice)
+        if ($clang > 0 && in_array($table, ['rex_article', 'rex_article_slice'], true)) {
+            $where[] = 'clang_id = ' . (int) $clang;
+        }
+        
         if ('' !== $dbWhere) {
             $conditions = array_map('trim', explode(',', $dbWhere));
             foreach ($conditions as $condition) {

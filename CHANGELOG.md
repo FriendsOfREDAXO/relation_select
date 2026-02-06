@@ -1,5 +1,21 @@
 # Changelog
 
+## Version 1.3.2 (2026-02-06)
+
+### 🐛 Bugfixes
+- **Multi-Language Support**: Farben und Badges werden jetzt korrekt beim Laden wiederhergestellt
+  - API filtert jetzt nach `clang_id` für mehrsprachige Tabellen (rex_article)
+  - Separater API-Call für ausgewählte Items mit vollständigen `displayFields`
+  - Duplikat-Handling: Bei mehreren Sprachversionen wird die mit gefüllten Feldern bevorzugt
+- **Selected Items**: Ausgewählte Einträge zeigen jetzt color-preview und badges beim Seitenladen
+- **Language Filter**: Automatische Erkennung der aktuellen Backend-Sprache (`rex.clang_id`)
+
+### 🔧 Technisch
+- `clang` Parameter in API hinzugefügt (Standard: 1)
+- JavaScript erkennt `rex.clang_id` automatisch oder nutzt Config-Wert
+- Promise.all() für parallele API-Calls (available + selected items)
+- Fallback-Logik bei mehreren Items mit gleicher ID
+
 ## Version 1.3.0 (2026-02-06)
 
 ### ✨ Neue Features

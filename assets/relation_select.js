@@ -231,6 +231,10 @@
                 params.append('dbob', config.dbob);
             }
             
+            // Add clang (current language) - check rex object or config
+            const clang = config.clang || (typeof rex !== 'undefined' && rex.clang_id) || 1;
+            params.append('clang', clang);
+            
             // Add token if provided in config (for frontend usage)
             if (config.token) {
                 params.append('token', config.token);
@@ -241,23 +245,61 @@
 
             const url = 'index.php?' + params.toString();
             
-            // Load data
-            fetch(url, {
+            // Get selected values
+            const selectedValues = input.value.split(',').filter(v => v);
+            const availableList = widget.find('.available-list');
+            const selectedList = widget.find('.selected-list');
+            
+            // Load all data
+            const fetchAllData = fetch(url, {
                 cache: 'no-store'
-            })
-                .then(response => {
+            }).then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            });
+            
+            // Load selected items separately (without dbw filter to get full data)
+            let fetchSelectedData = Promise.resolve([]);
+            if (selectedValues.length > 0) {
+                const selectedParams = new URLSearchParams({
+                    'rex-api-call': 'relation_select',
+                    'table': config.table,
+                    'value_field': config.valueField,
+                    'label_field': config.labelField
+                });
+                
+                if (config.displayFields) {
+                    selectedParams.append('display_fields', config.displayFields);
+                }
+                
+                // Add clang
+                selectedParams.append('clang', clang);
+                
+                // Use WHERE clause to get only selected IDs
+                const whereClause = selectedValues.map(v => `${config.valueField} = ${v}`).join(' OR ');
+                selectedParams.append('dbw', whereClause);
+                selectedParams.append('_t', Date.now());
+                
+                const selectedUrl = 'index.php?' + selectedParams.toString();
+                
+                fetchSelectedData = fetch(selectedUrl, {
+                    cache: 'no-store'
+                }).then(response => {
                     if (!response.ok) {
                         throw new Error('Network response was not ok');
                     }
                     return response.json();
-                })
-                .then(data => {
-                    const selectedValues = input.value.split(',').filter(v => v);
-                    const availableList = widget.find('.available-list');
-                    const selectedList = widget.find('.selected-list');
+                });
+            }
+            
+            // Wait for both requests
+            Promise.all([fetchAllData, fetchSelectedData])
+                .then(([allData, selectedData]) => {
                     
                     // Fill available items
-                    data.forEach(item => {
+                    allData.forEach(item => {
                         if (!selectedValues.includes(item.value.toString())) {
                             const escapedValue = $('<div>').text(item.value).html();
                             const formattedLabel = formatLabel(item, config);
@@ -274,9 +316,17 @@
                         }
                     });
 
-                    // Fill selected items
+                    // Fill selected items from selectedData (has full displayFields)
                     selectedValues.forEach(value => {
-                        const item = data.find(i => i.value.toString() === value);
+                        // Find all items with this value (multi-language support)
+                        let items = selectedData.filter(i => i.value.toString() === value);
+                        
+                        // Prefer item with displayFields filled (e.g., art_color not null)
+                        let item = items.find(i => {
+                            const displayFields = config.displayFields ? config.displayFields.split('|') : [];
+                            return displayFields.some(field => i[field.trim()] != null && i[field.trim()] !== '');
+                        }) || items[0];
+                        
                         if (item) {
                             const escapedValue = $('<div>').text(item.value).html();
                             const formattedLabel = formatLabel(item, config);
