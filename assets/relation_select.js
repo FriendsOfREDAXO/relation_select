@@ -62,12 +62,17 @@
                 // Badge: "badge:fieldname"
                 else if (part.startsWith('badge:')) {
                     const fieldName = part.substring(6);
-                    const fieldValue = item[fieldName] ? String(item[fieldName]).trim() : '';
-                    if (fieldValue !== '') {
+                    let fieldValue = item[fieldName] ? String(item[fieldName]).trim() : '';
+                    
+                    // Special handling for status field - show as circle indicator
+                    if (fieldName === 'status') {
+                        const statusClass = item[fieldName] == 1 ? 'relation-status-online' : 'relation-status-offline';
+                        const statusTitle = item[fieldName] == 1 ? 'Online' : 'Offline';
+                        html += `<span class="relation-status ${statusClass}" title="${statusTitle}"></span>`;
+                    } else if (fieldValue !== '') {
                         const badgeText = $('<div>').text(fieldValue).html();
                         html += `<span class="relation-badge">${badgeText}</span>`;
                     }
-                    // Don't show badge if empty - cleaner UI
                 }
                 // ID display: "(id)"
                 else if (part === '(id)') {
@@ -114,11 +119,26 @@
             const widget = $(`
                 <div class="relation-select-widget">
                     <div class="relation-select-available">
-                        <input type="text" class="form-control relation-select-search" placeholder="${i18n.search_placeholder}">
+                        <div class="relation-select-search-row">
+                            <input type="text" class="form-control relation-select-search" placeholder="${i18n.search_placeholder}">
+                            <button type="button" class="btn btn-default relation-select-add-all" title="Alle sichtbaren hinzufügen">
+                                <svg class="relation-select-icon" viewBox="0 0 24 24" width="16" height="16">
+                                    <path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                                </svg>
+                                Alle
+                            </button>
+                        </div>
                         <ul class="relation-select-list available-list"></ul>
                     </div>
                     <div class="relation-select-selected">
-                        <div class="relation-select-header">${i18n.selected_items}</div>
+                        <div class="relation-select-header-row">
+                            <div class="relation-select-header">${i18n.selected_items}</div>
+                            <button type="button" class="btn btn-link relation-select-clear-all" title="Alle entfernen">
+                                <svg class="relation-select-icon" viewBox="0 0 24 24" width="14" height="14">
+                                    <path fill="currentColor" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                                </svg>
+                            </button>
+                        </div>
                         <ul class="relation-select-list selected-list"></ul>
                     </div>
                 </div>
@@ -368,6 +388,20 @@
                         availableList.find('li').each(function() {
                             const text = $(this).text().toLowerCase();
                             $(this).toggle(text.includes(search));
+                        });
+                    });
+
+                    // Add all visible items
+                    widget.on('click', '.relation-select-add-all', function() {
+                        availableList.find('li:visible').each(function() {
+                            $(this).find('.add-item').click();
+                        });
+                    });
+
+                    // Clear all selected items
+                    widget.on('click', '.relation-select-clear-all', function() {
+                        selectedList.find('li').each(function() {
+                            $(this).find('.remove-item').click();
                         });
                     });
 

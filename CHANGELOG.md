@@ -1,5 +1,24 @@
 # Changelog
 
+## Version 1.3.3 (2026-02-06)
+
+### ✨ Neue Features
+- **"Alle hinzufügen" Button**: Neben der Suche - fügt alle sichtbaren/gefilterten Items auf einmal hinzu
+- **"Liste leeren" Button**: Papierkorb-Icon bei ausgewählten Einträgen - entfernt alle Auswahlen
+- **Status-Kreis-Indikator**: Status-Feld zeigt jetzt visuelle Kreise statt Text
+  - ● Gefüllter Kreis = Online (status=1)
+  - ○ Leerer Kreis = Offline (status=0)
+  - Tooltip zeigt "Online"/"Offline" beim Hover
+
+### 🎨 UX-Verbesserungen
+- Bulk-Aktionen: Schnelles Hinzufügen/Entfernen mehrerer Items
+- Visueller Status-Indikator ist intuitiver als "0" oder "1"
+- Symmetrisches Design mit Aktions-Buttons links und rechts
+
+### 🔧 Technisch
+- Badge-Logik erweitert: Spezialbehandlung für `status` Feld
+- Andere badge-Felder zeigen weiterhin Text-Badges
+
 ## Version 1.3.2 (2026-02-06)
 
 ### 🐛 Bugfixes

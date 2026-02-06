@@ -64,11 +64,52 @@ body.rex-theme-dark .relation-color-empty,
     flex-shrink: 0;
 }
 
+.relation-badge-online {
+    background: var(--rex-success-bg, #d4edda);
+    color: var(--rex-success-color, #155724);
+}
+
+/* Status Circle Indicator */
+.relation-status {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+    flex-shrink: 0;
+}
+
+.relation-status-online {
+    background: var(--rex-success-color, #28a745);
+    border: none;
+}
+
+.relation-status-offline {
+    background: transparent;
+    border: 2px solid var(--rex-text-muted, #6c757d);
+}
+
+body.rex-theme-dark .relation-status-offline,
+@media (prefers-color-scheme: dark) {
+    body:not(.rex-theme-light) .relation-status-offline {
+        border-color: rgba(255, 255, 255, 0.5);
+    }
+}
+
 body.rex-theme-dark .relation-badge,
 @media (prefers-color-scheme: dark) {
     body:not(.rex-theme-light) .relation-badge {
         background: rgba(64, 155, 228, 0.2);
         color: #409be4;
+    }
+}
+
+body.rex-theme-dark .relation-badge-online,
+@media (prefers-color-scheme: dark) {
+    body:not(.rex-theme-light) .relation-badge-online {
+        background: rgba(40, 167, 69, 0.2);
+        color: #28a745;
     }
 }
 
@@ -111,15 +152,53 @@ body.rex-theme-dark .relation-id,
     background: var(--rex-panel-bg, #fff);
 }
 
-.relation-select-search {
+.relation-select-search-row {
+    display: flex;
+    gap: 5px;
     margin-bottom: 10px;
-    width: 100%;
+    align-items: center;
+}
+
+.relation-select-search {
+    flex: 1;
+}
+
+.relation-select-add-all {
+    flex-shrink: 0;
+    white-space: nowrap;
+    padding: 6px 12px;
+    font-size: 12px;
+}
+
+.relation-select-add-all .relation-select-icon {
+    margin-right: 4px;
 }
 
 .relation-select-header {
     margin-bottom: 10px;
     font-weight: bold;
     color: var(--rex-text-color, #333);
+}
+
+.relation-select-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.relation-select-clear-all {
+    padding: 2px 8px;
+    font-size: 12px;
+    color: var(--rex-danger-color, #dc3545);
+}
+
+.relation-select-clear-all:hover {
+    color: var(--rex-danger-hover, #c82333);
+}
+
+.relation-select-clear-all .relation-select-icon {
+    vertical-align: middle;
 }
 
 .relation-select-list {
