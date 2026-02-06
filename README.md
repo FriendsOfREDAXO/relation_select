@@ -38,7 +38,8 @@ Widget wird direkt unterhalb des Input-Feldes angezeigt:
 
 ```html
 <input type="text" 
-    name="my_field" 
+    name="REX_INPUT_VALUE[1]" 
+    value="REX_VALUE[1]"
     data-relation-config='{
         "table": "rex_article",
         "valueField": "id",
@@ -52,7 +53,8 @@ Widget wird in einem Overlay-Dialog geöffnet (ideal für platzsparende Layouts 
 
 ```html
 <input type="text" 
-    name="my_field" 
+    name="REX_INPUT_VALUE[1]" 
+    value="REX_VALUE[1]"
     data-relation-mode="modal"
     data-relation-config='{
         "table": "rex_article",
@@ -113,7 +115,8 @@ Bei den **individuellen Attributen** des Feldes wird folgendes eingetragen:
 
 ```html
 <input type="text" 
-    name="authors" 
+    name="REX_INPUT_VALUE[2]" 
+    value="REX_VALUE[2]"
     data-relation-mode="modal"
     data-relation-config='{
         "table": "rex_authors",
@@ -131,6 +134,228 @@ Einfache Feldverknüpfung (mit automatischem Leerzeichen):
 ```json
 "labelField": "firstname|lastname"
 ```
+
+### Erweiterte Label-Formatierung (NEU in 1.3.0)
+
+Anzeige zusätzlicher Informationen wie Farben, IDs oder Status-Badges:
+
+**Parameter:**
+- `displayFields`: Zusätzliche Felder aus der Datenbank (Pipe-getrennt: `"color|status"`)
+- `displayFormat`: Format-String mit folgenden Optionen:
+  - `color:feldname` - Farbvorschau als Quadrat (16x16px)
+  - `badge:feldname` - Status/Info als Badge
+  - `(id)` - ID-Anzeige in Klammern
+  - Pipe-getrennte Kombinationen möglich
+
+---
+
+## Realistische Beispiele
+
+### 1. Artikel mit Farbkategorien (REDAXO Modul)
+
+```php
+<?php
+// Modul-Eingabe
+$field = '<input type="text" 
+    name="REX_INPUT_VALUE[1]" 
+    value="REX_VALUE[1]"
+    class="form-control relation-select"
+    data-relation-mode="modal"
+    data-relation-config=\'{
+        "table": "rex_article",
+        "valueField": "id",
+        "labelField": "name",
+        "displayFields": "art_color|status",
+        "displayFormat": "color:art_color|name|(id)|badge:status",
+        "dbw": "status = 1",
+        "dbob": "name,ASC"
+    }\'
+/>';
+
+echo $field;
+?>
+```
+
+**Ausgabe:**
+```php
+<?php
+$articleIds = explode(',', 'REX_VALUE[1]');
+$articleIds = array_filter(array_map('intval', $articleIds));
+
+if (count($articleIds) > 0) {
+    echo '<div class="article-grid">';
+    
+    foreach ($articleIds as $articleId) {
+        $article = rex_article::get($articleId);
+        if ($article) {
+            $color = $article->getValue('art_color') ?: '#cccccc';
+            $status = $article->getValue('status') == 1 ? 'Online' : 'Offline';
+            
+            echo '<div class="article-card" style="border-left: 4px solid ' . htmlspecialchars($color) . '">';
+            echo '  <h3>' . htmlspecialchars($article->getName()) . '</h3>';
+            echo '  <span class="status-badge">' . $status . '</span>';
+            echo '  <p class="article-id">#' . $articleId . '</p>';
+            echo '</div>';
+        }
+    }
+    
+    echo '</div>';
+}
+?>
+```
+
+**Ergebnis im Modal:** 🟦 Startseite (1) [Online]
+
+---
+
+### 2. Produkt-Tags mit Farben (YForm Tabelle)
+
+**Tabelle:** `rex_shop_tags`
+- `id` (int)
+- `name` (varchar)
+- `tag_color` (varchar - Hex-Farbcode)
+- `priority` (int)
+- `status` (int)
+
+**YForm Feld-Konfiguration:**
+
+Feld-Typ: **text**  
+Individuelle Attribute:
+```json
+{
+    "class": "form-control relation-select",
+    "data-relation-mode": "modal",
+    "data-relation-config": "{
+        \"table\": \"rex_shop_tags\",
+        \"valueField\": \"id\",
+        \"labelField\": \"name\",
+        \"displayFields\": \"tag_color\",
+        \"displayFormat\": \"color:tag_color|name\",
+        \"dbw\": \"status = 1\",
+        \"dbob\": \"priority,DESC,name,ASC\"
+    }"
+}
+```
+
+**Ergebnis:** 🟢 Bio-Produkt 🔵 Vegan 🟡 Glutenfrei
+
+---
+
+### 3. Event-Auswahl mit Datum und Status (REDAXO Modul)
+
+```html
+<input type="text" 
+    name="REX_INPUT_VALUE[2]" 
+    value="REX_VALUE[2]"
+    class="form-control relation-select"
+    data-relation-mode="modal"
+    data-relation-config='{
+        "table": "rex_yform_table_events",
+        "valueField": "id",
+        "labelField": "title",
+        "displayFields": "event_status",
+        "displayFormat": "name|(id)|badge:event_status",
+        "dbw": "event_date >= today, published = 1",
+        "dbob": "event_date,ASC"
+    }'
+/>
+```
+
+**Ergebnis im Modal:** 
+- Sommerfest 2026 (42) [Bestätigt]
+- Weihnachtsfeier (43) [In Planung]
+
+---
+
+### 4. Mitarbeiter mit Abteilung und Status (YForm)
+
+**Tabelle:** `rex_hr_employees`
+- `id` (int)
+- `firstname` (varchar)
+- `lastname` (varchar)
+- `department` (varchar)
+- `employment_status` (varchar - "Aktiv", "Urlaub", "Extern")
+- `active` (int)
+
+**YForm Feld-Konfiguration:**
+```json
+{
+    "class": "form-control relation-select",
+    "data-relation-config": "{
+        \"table\": \"rex_hr_employees\",
+        \"valueField\": \"id\",
+        \"labelField\": \"firstname|lastname\",
+        \"displayFields\": \"department|employment_status\",
+        \"displayFormat\": \"name|badge:employment_status\",
+        \"dbw\": \"active = 1\",
+        \"dbob\": \"lastname,ASC,firstname,ASC\"
+    }"
+}
+```
+
+**Ergebnis:** 
+- Max Mustermann [Aktiv]
+- Anna Schmidt [Urlaub]
+
+---
+
+### 5. Kategorien mit Hierarchie und Farbe
+
+```html
+<input type="text" 
+    name="REX_INPUT_VALUE[3]" 
+    value="REX_VALUE[3]"
+    class="form-control relation-select"
+    data-relation-config='{
+        "table": "rex_category",
+        "valueField": "id",
+        "labelField": "name",
+        "displayFields": "cat_color",
+        "displayFormat": "color:cat_color|(id)|name",
+        "dbw": "status = 1, parent_id != 0",
+        "dbob": "priority,DESC,name,ASC"
+    }'
+/>
+```
+
+**Ergebnis:** 🔴 (5) Dienstleistungen 🟢 (7) Produkte
+
+---
+
+### 6. Komplexes Beispiel: News mit Autor, Status und Priorität
+
+```html
+<input type="text" 
+    name="REX_INPUT_VALUE[4]" 
+    value="REX_VALUE[4]"
+    class="form-control relation-select"
+    data-relation-mode="modal"
+    data-relation-config='{
+        "table": "rex_yform_table_news",
+        "valueField": "id",
+        "labelField": "title",
+        "displayFields": "priority_color|status",
+        "displayFormat": "color:priority_color|name|(id)|badge:status",
+        "dbw": "status != [[Gelöscht]], publish_date <= now",
+        "dbob": "priority,DESC,publish_date,DESC"
+    }'
+/>
+```
+
+**Ergebnis im Modal:**
+- 🔴 Breaking: Wichtige Neuigkeit (123) [Veröffentlicht]
+- 🟡 Update verfügbar (124) [Entwurf]
+- 🟢 Wartungshinweis (125) [Geplant]
+
+---
+
+**Vorteile der erweiterten Formatierung:**
+✅ Sofortige visuelle Erkennung durch Farben  
+✅ Status auf einen Blick durch Badges  
+✅ ID-Anzeige für Debugging und Support  
+✅ Keine Bootstrap-Abhängigkeit  
+✅ Volle Dark-Theme-Unterstützung  
+✅ Frontend-kompatibel
 
 
 ### Filter-Syntax (dbw)

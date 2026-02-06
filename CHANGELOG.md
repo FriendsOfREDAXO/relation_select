@@ -1,5 +1,78 @@
 # Changelog
 
+## Version 1.3.0 (2026-02-06)
+
+### ✨ Neue Features
+- **Erweiterte Label-Formatierung**: Visuelle Anreicherung der Einträge
+  - **Color-Preview**: `displayFormat: "color:feldname"` zeigt Farbquadrat an
+  - **Status-Badge**: `displayFormat: "badge:feldname"` zeigt Status als Badge
+  - **ID-Display**: `displayFormat: "(id)"` zeigt ID in Klammern
+  - **Kombinationen**: Mehrere Formate kombinierbar (z.B. `"color:color|(id)|badge:status"`)
+  - Keine Bootstrap-Abhängigkeit - Pure CSS-Komponenten
+  - Dark-Theme-Unterstützung für alle neuen Komponenten
+- **API-Erweiterung**: `displayFields` Parameter für zusätzliche Datenfelder
+- **Item-Daten**: Alle Felder werden als `data-item` Attribut gespeichert für flexible Verwendung
+
+### 🐛 Bugfixes
+- **PHP Syntax Error**: api.php Zeile 93 korrigiert - ORDER BY und SELECT Statements waren durcheinander geraten
+- **Type Safety**: `formatLabel()` konvertiert jetzt alle Werte zu Strings vor `.trim()` Aufruf
+- **Empty Value Handling**: Leere oder null Werte in displayFields werden korrekt behandelt
+
+### 🎭 UX-Verbesserungen
+- Farbvorschau macht Kategorien/Tags sofort erkennbar
+- Status-Badges zeigen Zustand auf einen Blick
+- ID-Anzeige hilft bei der Identifikation
+- Visuelle Hierarchie durch gestaffelte Komponenten
+
+### 📘 Dokumentation
+- README erweitert mit 6 realistischen Praxisbeispielen:
+  1. Artikel mit Farbkategorien (REDAXO Modul mit Eingabe + Ausgabe)
+  2. Produkt-Tags mit Farben (YForm-Tabelle)
+  3. Event-Auswahl mit Datum-Filter
+  4. Mitarbeiter-Verwaltung mit Status-Badges
+  5. Kategorien mit Hierarchie und Farbe
+  6. News-System mit Prioritäten
+- Kombinationsbeispiele dokumentiert
+- YForm-Integration mit doppelt-escaptem JSON erklärt
+
+### 🎨 CSS
+- `.relation-color-preview` - 16x16px Farbquadrat mit Border
+- `.relation-badge` - Info-Badge im REDAXO-Stil
+- `.relation-id` - Monospace ID-Display
+- `.relation-label-text` - Haupt-Label-Text
+- Alle Komponenten mit Dark-Theme-Varianten
+
+## Version 1.3.1 (2026-02-06)
+
+### 🐛 Bugfixes
+- **Badge Initial-State**: Badge zeigt jetzt korrekt die `has-items` Klasse (blau) beim Laden, wenn bereits Werte ausgewählt sind
+- **Speicher-Logik**: Funktionierende `updateValue()` Methode von Version 1.1.2 wiederhergestellt - Daten werden jetzt wieder korrekt gespeichert
+- **README korrigiert**: Alle Modul-Beispiele verwenden jetzt `REX_INPUT_VALUE[1]` statt `my_field` für korrekte REDAXO-Modul-Integration
+
+### ✨ Features
+- **SVG-Icons**: Alle FontAwesome-Icons durch eigene inline-SVG ersetzt (Material Design Style)
+  - Plus-Icon für Hinzufügen
+  - Minus-Icon für Entfernen
+  - Drag-Handle (6 Punkte)
+  - Listen-Icon für Modal-Button
+  - Close-Icon für Modal
+  - `fill: currentColor` für automatische Theme-Anpassung
+  - Keine externe Abhängigkeit mehr
+- **Click-on-Row**: Gesamte Zeile ist jetzt klickbar (nicht nur der Button)
+  - Verbesserte UX
+  - Hover-Effekt zeigt Klickbarkeit
+  - Button hat `stopPropagation()` für saubere Event-Behandlung
+- **XSS-Schutz**: Alle Values und Labels werden durch `$('<div>').text().html()` escaped
+
+### 📚 Dokumentation
+- README-Beispiele korrigiert mit `REX_INPUT_VALUE[x]` und `REX_VALUE[x]`
+- Testmodul hinzugefügt (`test_module.php`) für Debug-Zwecke
+
+### 🔧 Technisch
+- Basis: Version 1.1.2 (funktionierende Speicher-Logik)
+- Modal-System aufgesetzt auf bewährte Grundlage
+- `input.value = ...` statt `$(input).val()` für Kompatibilität
+
 ## Version 1.2.0 (2026-02-05)
 
 ### ✨ Neue Features

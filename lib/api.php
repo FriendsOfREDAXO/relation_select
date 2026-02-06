@@ -36,6 +36,7 @@ class RelationSelect extends rex_api_function
         $table = rex_get('table', 'string', '');
         $valueField = rex_get('value_field', 'string', '');
         $labelField = rex_get('label_field', 'string', '');
+        $displayFields = rex_get('display_fields', 'string', ''); // Additional fields for color, badge, etc.
         $dbWhere = rex_get('dbw', 'string', '');
         $dbOrderBy = rex_get('dbob', 'string', '');
 
@@ -56,6 +57,17 @@ class RelationSelect extends rex_api_function
         }
 
         $labelExpr = 'CONCAT(' . implode(", ' ', ", $labelExpr) . ') as label';
+
+        // Parse display fields for additional data (color, status, etc.)
+        $additionalFields = [];
+        if ('' !== $displayFields) {
+            $displayFieldsList = array_map('trim', explode('|', $displayFields));
+            foreach ($displayFieldsList as $displayField) {
+                if ('' !== $displayField) {
+                    $additionalFields[] = $sql->escapeIdentifier($displayField);
+                }
+            }
+        }
 
         // Parse WHERE conditions
         $where = [];
@@ -88,9 +100,14 @@ class RelationSelect extends rex_api_function
             }
         }
 
+        // Build SELECT fields array
+        $selectFields = [$sql->escapeIdentifier($valueField) . ' as value', $labelExpr];
+        if (count($additionalFields) > 0) {
+            $selectFields = array_merge($selectFields, $additionalFields);
+        }
+        
         // Build query
-        $query = 'SELECT DISTINCT ' . $sql->escapeIdentifier($valueField) . ' as value, '
-               . $labelExpr . ' FROM '
+        $query = 'SELECT DISTINCT ' . implode(', ', $selectFields) . ' FROM '
                . $sql->escapeIdentifier($table);
 
         if (count($where) > 0) {

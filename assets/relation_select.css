@@ -7,6 +7,95 @@
     fill: currentColor;
 }
 
+/* Enhanced Label Components */
+.relation-color-preview {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    margin-right: 6px;
+    vertical-align: middle;
+    flex-shrink: 0;
+}
+
+.relation-color-empty {
+    background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.05) 2px,
+        rgba(0, 0, 0, 0.05) 4px
+    );
+}
+
+body.rex-theme-dark .relation-color-preview,
+@media (prefers-color-scheme: dark) {
+    body:not(.rex-theme-light) .relation-color-preview {
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+}
+
+body.rex-theme-dark .relation-color-empty,
+@media (prefers-color-scheme: dark) {
+    body:not(.rex-theme-light) .relation-color-empty {
+        background: repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 2px,
+            rgba(255, 255, 255, 0.1) 2px,
+            rgba(255, 255, 255, 0.1) 4px
+        );
+    }
+}
+
+.relation-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.4;
+    border-radius: 3px;
+    background: var(--rex-info-bg, #e7f3ff);
+    color: var(--rex-info-color, #0066cc);
+    margin-right: 6px;
+    vertical-align: middle;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+body.rex-theme-dark .relation-badge,
+@media (prefers-color-scheme: dark) {
+    body:not(.rex-theme-light) .relation-badge {
+        background: rgba(64, 155, 228, 0.2);
+        color: #409be4;
+    }
+}
+
+.relation-id {
+    display: inline-block;
+    font-size: 11px;
+    color: var(--rex-text-muted, #6c757d);
+    margin-right: 6px;
+    vertical-align: middle;
+    font-family: monospace;
+    flex-shrink: 0;
+}
+
+body.rex-theme-dark .relation-id,
+@media (prefers-color-scheme: dark) {
+    body:not(.rex-theme-light) .relation-id {
+        color: rgba(255, 255, 255, 0.5);
+    }
+}
+
+.relation-label-text {
+    flex: 1;
+    margin: 0 8px;
+    word-break: break-word;
+    color: var(--rex-text-color, inherit);
+}
+
 .relation-select-widget {
     display: flex;
     gap: 20px;
@@ -73,7 +162,9 @@
     margin-bottom: 0;
 }
 
+/* Remove old .title class styling as we now use enhanced labels */
 .relation-select-list .title {
+    /* Deprecated - kept for backwards compatibility */
     flex: 1;
     margin: 0 10px;
     word-break: break-word;

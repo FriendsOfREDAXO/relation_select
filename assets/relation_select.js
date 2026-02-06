@@ -28,6 +28,60 @@
         return translations['de'];
     }
 
+    /**
+     * Format label with enhanced syntax support
+     * @param {Object} item - Data item with value, label and optional display fields
+     * @param {Object} config - Configuration with labelFormat and displayFormat options
+     * @returns {string} Formatted HTML label
+     */
+    function formatLabel(item, config) {
+        let html = '';
+        
+        // Check for enhanced label format
+        const labelFormat = config.labelFormat || '';
+        const displayFormat = config.displayFormat || '';
+        
+        if (displayFormat) {
+            // Parse display format: "color:fieldname|badge:status|(id)"
+            const parts = displayFormat.split('|');
+            parts.forEach(part => {
+                part = part.trim();
+                
+                // Color preview: "color:fieldname"
+                if (part.startsWith('color:')) {
+                    const fieldName = part.substring(6);
+                    const fieldValue = item[fieldName] ? String(item[fieldName]).trim() : '';
+                    if (fieldValue !== '') {
+                        const color = $('<div>').text(fieldValue).html();
+                        html += `<span class="relation-color-preview" style="background-color: ${color}"></span>`;
+                    } else {
+                        // Show placeholder for empty color
+                        html += `<span class="relation-color-preview relation-color-empty"></span>`;
+                    }
+                }
+                // Badge: "badge:fieldname"
+                else if (part.startsWith('badge:')) {
+                    const fieldName = part.substring(6);
+                    const fieldValue = item[fieldName] ? String(item[fieldName]).trim() : '';
+                    if (fieldValue !== '') {
+                        const badgeText = $('<div>').text(fieldValue).html();
+                        html += `<span class="relation-badge">${badgeText}</span>`;
+                    }
+                    // Don't show badge if empty - cleaner UI
+                }
+                // ID display: "(id)"
+                else if (part === '(id)') {
+                    html += `<span class="relation-id">(${$('<div>').text(item.value).html()})</span>`;
+                }
+            });
+        }
+        
+        // Add main label
+        html += `<span class="relation-label-text">${$('<div>').text(item.label).html()}</span>`;
+        
+        return html;
+    }
+
     function initRelationSelect(container) {
         const i18n = getI18n();
 
@@ -41,7 +95,7 @@
             $(input).data('relation-initialized', true);
 
             let config;
-            const mode = input.dataset.relationMode || 'inline'; // 'inline' or 'modal'
+            const mode = input.dataset.relationMode || 'inline'; // 'inline' or 'modal';
             
             try {
                 config = JSON.parse(input.dataset.relationConfig || '{}');
@@ -73,13 +127,14 @@
             if (mode === 'modal') {
                 // Modal mode: Create button and modal overlay
                 const selectedCount = input.value ? input.value.split(',').filter(v => v).length : 0;
+                const badgeClass = selectedCount > 0 ? 'relation-select-badge has-items' : 'relation-select-badge';
                 const button = $(`
                     <button type="button" class="btn btn-default relation-select-open-modal">
                         <svg class="relation-select-icon" viewBox="0 0 24 24" width="14" height="14">
                             <path fill="currentColor" d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>
                         </svg>
                         Auswählen
-                        <span class="relation-select-badge">${selectedCount}</span>
+                        <span class="${badgeClass}">${selectedCount}</span>
                     </button>
                 `);
                 
@@ -166,6 +221,9 @@
             });
 
             // Add optional parameters if they exist
+            if (config.displayFields) {
+                params.append('display_fields', config.displayFields);
+            }
             if (config.dbw) {
                 params.append('dbw', config.dbw);
             }
@@ -185,46 +243,34 @@
             
             // Load data
             fetch(url, {
-                cache: 'no-store',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
+                cache: 'no-store'
             })
                 .then(response => {
                     if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
+                        throw new Error('Network response was not ok');
                     }
                     return response.json();
                 })
                 .then(data => {
-                    if (!Array.isArray(data)) {
-                        throw new Error('Invalid data format received');
-                    }
-                    
                     const selectedValues = input.value.split(',').filter(v => v);
                     const availableList = widget.find('.available-list');
                     const selectedList = widget.find('.selected-list');
-                    
-                    // Create document fragment for better performance
-                    const availableFragment = document.createDocumentFragment();
-                    const selectedFragment = document.createDocumentFragment();
                     
                     // Fill available items
                     data.forEach(item => {
                         if (!selectedValues.includes(item.value.toString())) {
                             const escapedValue = $('<div>').text(item.value).html();
-                            const escapedLabel = $('<div>').text(item.label).html();
-                            const li = $(`
-                                <li data-value="${escapedValue}" class="relation-select-item-available">
-                                    <span class="title">${escapedLabel}</span>
+                            const formattedLabel = formatLabel(item, config);
+                            availableList.append(`
+                                <li data-value="${escapedValue}" class="relation-select-item-available" data-item='${JSON.stringify(item).replace(/'/g, "&apos;")}'>
+                                    ${formattedLabel}
                                     <button type="button" class="btn btn-link add-item" aria-label="Hinzufügen">
                                         <svg class="relation-select-icon" viewBox="0 0 24 24" width="16" height="16">
                                             <path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
                                         </svg>
                                     </button>
                                 </li>
-                            `)[0];
-                            availableFragment.appendChild(li);
+                            `);
                         }
                     });
 
@@ -233,9 +279,9 @@
                         const item = data.find(i => i.value.toString() === value);
                         if (item) {
                             const escapedValue = $('<div>').text(item.value).html();
-                            const escapedLabel = $('<div>').text(item.label).html();
-                            const li = $(`
-                                <li data-value="${escapedValue}">
+                            const formattedLabel = formatLabel(item, config);
+                            selectedList.append(`
+                                <li data-value="${escapedValue}" data-item='${JSON.stringify(item).replace(/'/g, "&apos;")}'>
                                     <svg class="relation-select-icon handle" viewBox="0 0 24 24" width="16" height="16" aria-label="Sortieren">
                                         <circle cx="9" cy="5" r="1.5" fill="currentColor"/>
                                         <circle cx="9" cy="12" r="1.5" fill="currentColor"/>
@@ -244,21 +290,16 @@
                                         <circle cx="15" cy="12" r="1.5" fill="currentColor"/>
                                         <circle cx="15" cy="19" r="1.5" fill="currentColor"/>
                                     </svg>
-                                    <span class="title">${escapedLabel}</span>
+                                    ${formattedLabel}
                                     <button type="button" class="btn btn-link remove-item" aria-label="Entfernen">
                                         <svg class="relation-select-icon" viewBox="0 0 24 24" width="16" height="16">
                                             <path fill="currentColor" d="M19 13H5v-2h14v2z"/>
                                         </svg>
                                     </button>
                                 </li>
-                            `)[0];
-                            selectedFragment.appendChild(li);
+                            `);
                         }
                     });
-                    
-                    // Append fragments to DOM (single reflow)
-                    availableList[0].appendChild(availableFragment);
-                    selectedList[0].appendChild(selectedFragment);
 
                     // Make selected list sortable
                     if (typeof Sortable !== 'undefined') {
@@ -271,17 +312,13 @@
                         console.warn('SortableJS not found. Sorting disabled.');
                     }
 
-                    // Search functionality with debounce for better performance
-                    let searchTimeout;
+                    // Search functionality
                     widget.find('.relation-select-search').on('input', function() {
-                        clearTimeout(searchTimeout);
                         const search = this.value.toLowerCase();
-                        searchTimeout = setTimeout(() => {
-                            availableList.find('li').each(function() {
-                                const text = $(this).find('.title').text().toLowerCase();
-                                $(this).toggle(text.includes(search));
-                            });
-                        }, 200);
+                        availableList.find('li').each(function() {
+                            const text = $(this).text().toLowerCase();
+                            $(this).toggle(text.includes(search));
+                        });
                     });
 
                     // Add item - Click on entire row OR button
@@ -297,13 +334,13 @@
                         e.stopPropagation(); // Prevent double triggering
                         const li = $(this).closest('li');
                         const value = li.data('value');
-                        const title = li.find('.title').text();
+                        const item = JSON.parse(li.attr('data-item') || '{}');
                         
                         const escapedValue = $('<div>').text(value).html();
-                        const escapedTitle = $('<div>').text(title).html();
+                        const formattedLabel = formatLabel(item, config);
                         
                         selectedList.append(`
-                            <li data-value="${escapedValue}">
+                            <li data-value="${escapedValue}" data-item='${li.attr('data-item')}'>
                                 <svg class="relation-select-icon handle" viewBox="0 0 24 24" width="16" height="16">
                                     <circle cx="9" cy="5" r="1.5" fill="currentColor"/>
                                     <circle cx="9" cy="12" r="1.5" fill="currentColor"/>
@@ -312,7 +349,7 @@
                                     <circle cx="15" cy="12" r="1.5" fill="currentColor"/>
                                     <circle cx="15" cy="19" r="1.5" fill="currentColor"/>
                                 </svg>
-                                <span class="title">${escapedTitle}</span>
+                                ${formattedLabel}
                                 <button type="button" class="btn btn-link remove-item">
                                     <svg class="relation-select-icon" viewBox="0 0 24 24" width="16" height="16">
                                         <path fill="currentColor" d="M19 13H5v-2h14v2z"/>
@@ -328,14 +365,14 @@
                     widget.on('click', '.remove-item', function() {
                         const li = $(this).closest('li');
                         const value = li.data('value');
-                        const title = li.find('.title').text();
+                        const item = JSON.parse(li.attr('data-item') || '{}');
                         
                         const escapedValue = $('<div>').text(value).html();
-                        const escapedTitle = $('<div>').text(title).html();
+                        const formattedLabel = formatLabel(item, config);
                         
                         availableList.append(`
-                            <li data-value="${escapedValue}" class="relation-select-item-available">
-                                <span class="title">${escapedTitle}</span>
+                            <li data-value="${escapedValue}" class="relation-select-item-available" data-item='${li.attr('data-item')}'>
+                                ${formattedLabel}
                                 <button type="button" class="btn btn-link add-item">
                                     <svg class="relation-select-icon" viewBox="0 0 24 24" width="16" height="16">
                                         <path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
