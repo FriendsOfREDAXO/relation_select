@@ -93,11 +93,27 @@ Im YForm Table Manager unter **Felder > Hinzufügen** den Typ **`relation_select
 | Wertfeld | Gespeichertes Feld (Standard: `id`) | `id` |
 | Anzeigefeld(er) | Label, mehrere mit `\|` trennen | `vorname\|nachname` |
 | Zusatzfelder (Display) | Farbe/Badge-Felder | `color:farbe\|badge:status` |
-| WHERE-Filter | SQL-WHERE-Bedingung | `status = 1` |
-| Sortierung | Feld + Richtung, kommasepariert | `name, ASC` |
+| WHERE-Filter | Einträge einschränken (entspricht `dbw`) | `status = 1` |
+| Sortierung | Sortierreihenfolge (entspricht `dbob`) | `name, ASC` |
 | Mehrfachauswahl | Mehrere IDs speicherbar | ✓ |
 
-**Suche im Tabellenmanager:** Wenn das Feld als durchsuchbar markiert ist, erscheint in der Suche automatisch ein Dropdown mit allen Einträgen der Quelltabelle (Einzelauswahl).
+Die Einstellungen **WHERE-Filter** und **Sortierung** im YForm-Feldtyp entsprechen exakt den `dbw`- und `dbob`-Parametern, die beim manuellen Textfeld per `data-relation-config` übergeben werden – gleiche Syntax, gleiche Regeln:
+
+- **WHERE-Filter** (`dbw`): SQL-WHERE-Bedingung, mehrere Bedingungen kommasepariert:
+  ```
+  status = 1, deleted = 0
+  ```
+- **Sortierung** (`dbob`): Feld und Richtung (`ASC`/`DESC`) abwechselnd kommasepariert:
+  ```
+  name, ASC
+  nachname, ASC, vorname, ASC
+  ```
+- **Zusatzfelder (Display)** (`displayFields`): Pipe-getrennte Anweisung für visuelle Extras:
+  ```
+  color:farbe|badge:status|(id)
+  ```
+
+**Suche im Tabellenmanager:** Wenn das Feld als durchsuchbar markiert ist, erscheint in der Suche automatisch ein Dropdown mit allen Einträgen der Quelltabelle (Einzelauswahl). Der WHERE-Filter aus der Feldkonfiguration wird dabei berücksichtigt.
 
 **Listendarstellung:** Bei einem ausgewählten Datensatz wird dessen Label angezeigt. Bei mehreren Datensätzen erscheint ein Badge mit der Anzahl (z. B. `5 Datensätze`).
 
