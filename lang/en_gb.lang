@@ -7,3 +7,21 @@ relation_select_token_description = This token is only required if the API is to
 relation_select_search_placeholder = Search...
 relation_select_selected_items = Selected items
 relation_select_error_loading = Error loading data
+
+# YForm Value
+relation_select_yform_description = Relation Select Widget – select records from any table via search widget
+relation_select_yform_table = Table
+relation_select_yform_table_notice = Database name of the source table, e.g. rex_my_table
+relation_select_yform_value_field = Value field
+relation_select_yform_value_field_notice = Field stored as value, default: id
+relation_select_yform_label_field = Label field(s)
+relation_select_yform_label_field_notice = Fields displayed as label, separate multiple with |, e.g. firstname|lastname
+relation_select_yform_display_fields = Display fields
+relation_select_yform_display_fields_notice = Optional extra fields for colour/badge, e.g. color:colour|badge:status – separate with |
+relation_select_yform_filter = WHERE filter
+relation_select_yform_filter_notice = SQL WHERE condition, e.g. status = 1
+relation_select_yform_order_by = Sort order
+relation_select_yform_order_by_notice = Fields & direction comma-separated, e.g. name, ASC or name, ASC, prio, DESC
+relation_select_yform_multiple = Multiple selection
+relation_select_search_empty_option = Please select …
+relation_select_list_records = records

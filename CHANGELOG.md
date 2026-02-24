@@ -1,5 +1,19 @@
 # Changelog
 
+## Version 1.4.0 (2026-02-24)
+
+### ✨ Neue Features
+- **YForm Value-Typ `relation_select`**: Das Widget steht jetzt nativ als eigener YForm-Feldtyp zur Verfügung – kein Umweg über `text` mit individuellen Attributen mehr nötig
+  - Felder: Tabelle, Wertfeld, Anzeigefeld(er), Zusatzfelder (Display), WHERE-Filter, Sortierung, Mehrfachauswahl
+- **YForm Tabellenmanager-Suche**: Suchfeld für `relation_select`-Felder ist jetzt ein Dropdown mit allen verfügbaren Einträgen der Quelltabelle
+- **Listendarstellung**: Bei einem ausgewählten Datensatz wird dessen Label angezeigt, bei mehreren Datensätzen die Anzahl als Badge (z. B. `5 Datensätze`)
+
+### 🔧 Technisch
+- Neue Datei `lib/yform/value/rex_yform_value_relation_select.php` mit `getSearchField()`, `getSearchFilter()`, `getListValue()`
+- Neues YForm-Bootstrap-Template `ytemplates/bootstrap/value.relation_select.tpl.php`
+- `boot.php` registriert automatisch den Template-Pfad wenn yform verfügbar ist
+- `package.yml` deklariert yform >= 4.0 als optionale Abhängigkeit
+
 ## Version 1.3.3 (2026-02-06)
 
 ### ✨ Neue Features

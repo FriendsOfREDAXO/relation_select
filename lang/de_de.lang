@@ -7,3 +7,21 @@ relation_select_token_description = Dieser Token wird nur benötigt, wenn die AP
 relation_select_search_placeholder = Suchen...
 relation_select_selected_items = Ausgewählte Einträge
 relation_select_error_loading = Fehler beim Laden der Daten
+
+# YForm Value
+relation_select_yform_description = Relation Select Widget – wählt Datensätze aus einer beliebigen Tabelle per Such-Widget aus
+relation_select_yform_table = Tabelle
+relation_select_yform_table_notice = Datenbankname der Quelltabelle, z.B. rex_my_table
+relation_select_yform_value_field = Wertfeld
+relation_select_yform_value_field_notice = Feld das als Wert gespeichert wird, standard: id
+relation_select_yform_label_field = Anzeigefeld(er)
+relation_select_yform_label_field_notice = Felder die als Label angezeigt werden, mehrere mit | trennen, z.B. vorname|nachname
+relation_select_yform_display_fields = Zusatzfelder (Display)
+relation_select_yform_display_fields_notice = Optionale Zusatzfelder für Farbe/Badge, z.B. color:farbe|badge:status – trennen mit |
+relation_select_yform_filter = WHERE-Filter
+relation_select_yform_filter_notice = SQL-WHERE-Bedingung, z.B. status = 1
+relation_select_yform_order_by = Sortierung
+relation_select_yform_order_by_notice = Felder & Richtung kommasepariert, z.B. name, ASC oder name, ASC, prio, DESC
+relation_select_yform_multiple = Mehrfachauswahl
+relation_select_search_empty_option = Bitte wählen …
+relation_select_list_records = Datensätze

@@ -15,6 +15,7 @@ Ermöglicht die Auswahl und Sortierung verknüpfter Datensätze mit erweiterten 
 - 📅 Automatische Datumswerte (now, today)
 - 🏷️ Flexible Label-Gestaltung durch Feldverknüpfungen
 - 🔗 Unterstützung für Meta Infos und YForm
+- 📋 **Nativer YForm-Feldtyp** mit Tabellenmanager-Suche und Listendarstellung (ab 1.4.0)
 
 ## Installation
 
@@ -80,7 +81,29 @@ Widget wird in einem Overlay-Dialog geöffnet (ideal für platzsparende Layouts 
 - Badge ist grau bei 0 Einträgen, blau bei Auswahl
 - Live-Update der Badge-Anzahl bei Änderungen
 
-### Beispiel für eine Relation in YForm
+### YForm Value-Typ (empfohlen)
+
+Ab Version 1.4.0 steht `relation_select` als eigenständiger **YForm-Feldtyp** zur Verfügung. Das AddOn muss dafür aktiv sein, yform ist eine optionale Abhängigkeit.
+
+Im YForm Table Manager unter **Felder > Hinzufügen** den Typ **`relation_select`** wählen. Folgende Einstellungen stehen zur Verfügung:
+
+| Feld | Beschreibung | Beispiel |
+|------|-------------|----------|
+| Tabelle | Datenbankname der Quelltabelle | `rex_autoren` |
+| Wertfeld | Gespeichertes Feld (Standard: `id`) | `id` |
+| Anzeigefeld(er) | Label, mehrere mit `\|` trennen | `vorname\|nachname` |
+| Zusatzfelder (Display) | Farbe/Badge-Felder | `color:farbe\|badge:status` |
+| WHERE-Filter | SQL-WHERE-Bedingung | `status = 1` |
+| Sortierung | Feld + Richtung, kommasepariert | `name, ASC` |
+| Mehrfachauswahl | Mehrere IDs speicherbar | ✓ |
+
+**Suche im Tabellenmanager:** Wenn das Feld als durchsuchbar markiert ist, erscheint in der Suche automatisch ein Dropdown mit allen Einträgen der Quelltabelle (Einzelauswahl).
+
+**Listendarstellung:** Bei einem ausgewählten Datensatz wird dessen Label angezeigt. Bei mehreren Datensätzen erscheint ein Badge mit der Anzahl (z. B. `5 Datensätze`).
+
+---
+
+### Beispiel für eine Relation in YForm (als Textfeld mit Attributen)
 
 Das Feld wird als **Textfeld** mit dem Namen der Relation angelegt (z.B. `autoren_id`).
 

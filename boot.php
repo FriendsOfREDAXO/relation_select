@@ -15,3 +15,9 @@ if (rex::isBackend() && 'login' != rex_be_controller::getCurrentPage()) {
 }
 
 rex_api_function::register('relation_select', RelationSelect::class);
+
+// YForm-Integration
+$addon = rex_addon::get('relation_select');
+if (rex_addon::get('yform')->isAvailable()) {
+    rex_yform::addTemplatePath($addon->getPath('ytemplates'));
+}
