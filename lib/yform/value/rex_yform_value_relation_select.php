@@ -24,15 +24,25 @@ class rex_yform_value_relation_select extends rex_yform_value_abstract
         if ($this->needsOutput() && $this->isViewable()) {
             $multiple = (bool) $this->getElement('multiple');
 
+            $cfg = self::resolveConfig(
+                (string) $this->getElement('table'),
+                (string) ($this->getElement('value_field') ?: 'id'),
+                (string) $this->getElement('label_field'),
+                (string) $this->getElement('display_fields'),
+                (string) $this->getElement('filter'),
+                (string) $this->getElement('order_by'),
+                (string) $this->getElement('attributes'),
+            );
+
             $this->params['form_output'][$this->getId()] = $this->parse(
                 'value.relation_select.tpl.php',
                 [
-                    'table'          => (string) $this->getElement('table'),
-                    'value_field'    => (string) ($this->getElement('value_field') ?: 'id'),
-                    'label_field'    => (string) $this->getElement('label_field'),
-                    'display_fields' => (string) $this->getElement('display_fields'),
-                    'filter'         => (string) $this->getElement('filter'),
-                    'order_by'       => (string) $this->getElement('order_by'),
+                    'table'          => $cfg['table'],
+                    'value_field'    => $cfg['value_field'],
+                    'label_field'    => $cfg['label_field'],
+                    'display_fields' => $cfg['display_fields'],
+                    'filter'         => $cfg['filter'],
+                    'order_by'       => $cfg['order_by'],
                     'multiple'       => $multiple,
                 ],
             );
@@ -70,11 +80,53 @@ class rex_yform_value_relation_select extends rex_yform_value_abstract
                     'notice' => rex_i18n::msg('relation_select_yform_order_by_notice')],
                 'multiple'       => ['type' => 'boolean', 'label' => rex_i18n::msg('relation_select_yform_multiple'),
                     'default' => 1],
+                'attributes'     => ['type' => 'text',    'label' => rex_i18n::msg('yform_values_defaults_attributes'),
+                    'notice' => rex_i18n::msg('relation_select_yform_attributes_notice')],
                 'notice'         => ['type' => 'text',    'label' => rex_i18n::msg('yform_values_defaults_notice')],
             ],
             'description' => rex_i18n::msg('relation_select_yform_description'),
             'db_type'     => ['text', 'varchar(191)'],
             'famous'      => false,
+        ];
+    }
+
+    /**
+     * Löst die Feldkonfiguration auf. Sind die neuen Felder leer, wird als Fallback
+     * das attributes-JSON auf einen data-relation-config-Key geprüft.
+     *
+     * @return array{table:string, value_field:string, label_field:string, display_fields:string, filter:string, order_by:string}
+     */
+    private static function resolveConfig(
+        string $table,
+        string $valueField,
+        string $labelField,
+        string $displayFields,
+        string $filter,
+        string $orderBy,
+        string $rawAttributes,
+    ): array {
+        if ('' === $table) {
+            $attrs = json_decode($rawAttributes, true);
+            if (is_array($attrs) && isset($attrs['data-relation-config'])) {
+                $cfg = json_decode($attrs['data-relation-config'], true);
+                if (is_array($cfg)) {
+                    $table         = (string) ($cfg['table'] ?? '');
+                    $valueField    = (string) ($cfg['valueField'] ?? $cfg['value_field'] ?? $valueField ?: 'id');
+                    $labelField    = (string) ($cfg['labelField'] ?? $cfg['label_field'] ?? $labelField);
+                    $displayFields = (string) ($cfg['displayFields'] ?? $cfg['display_fields'] ?? $displayFields);
+                    $filter        = (string) ($cfg['dbw'] ?? $cfg['filter'] ?? $filter);
+                    $orderBy       = (string) ($cfg['dbob'] ?? $cfg['order_by'] ?? $orderBy);
+                }
+            }
+        }
+
+        return [
+            'table'          => $table,
+            'value_field'    => '' !== $valueField ? $valueField : 'id',
+            'label_field'    => $labelField,
+            'display_fields' => $displayFields,
+            'filter'         => $filter,
+            'order_by'       => $orderBy,
         ];
     }
 
@@ -86,10 +138,20 @@ class rex_yform_value_relation_select extends rex_yform_value_abstract
      */
     private static function buildChoicesArray(rex_yform_manager_field $field): array
     {
-        $table       = (string) $field->getElement('table');
-        $valueField  = (string) ($field->getElement('value_field') ?: 'id');
-        $labelFields = array_filter(array_map('trim', explode('|', (string) $field->getElement('label_field'))));
-        $orderBy     = (string) $field->getElement('order_by');
+        $cfg        = self::resolveConfig(
+            (string) $field->getElement('table'),
+            (string) ($field->getElement('value_field') ?: 'id'),
+            (string) $field->getElement('label_field'),
+            (string) $field->getElement('display_fields'),
+            (string) $field->getElement('filter'),
+            (string) $field->getElement('order_by'),
+            (string) $field->getElement('attributes'),
+        );
+        $table       = $cfg['table'];
+        $valueField  = $cfg['value_field'];
+        $labelFields = array_filter(array_map('trim', explode('|', $cfg['label_field'])));
+        $orderBy     = $cfg['order_by'];
+        $filter      = $cfg['filter'];
 
         if ('' === $table || [] === $labelFields) {
             return [];
@@ -106,6 +168,10 @@ class rex_yform_value_relation_select extends rex_yform_value_abstract
                 . $sql->escapeIdentifier($valueField) . ' AS val, '
                 . $labelExpr . ' AS lbl '
                 . 'FROM ' . $sql->escapeIdentifier($table);
+
+            if ('' !== $filter) {
+                $query .= ' WHERE ' . $filter;
+            }
 
             if ('' !== $orderBy) {
                 $orderClauses = [];
@@ -215,10 +281,18 @@ class rex_yform_value_relation_select extends rex_yform_value_abstract
         }
 
         // Genau ein Eintrag: Label aus der Datenbank laden
-        $table       = (string) ($field['table'] ?? '');
-        $valueField  = (string) ($field['value_field'] ?: 'id');
-        $labelRaw    = (string) ($field['label_field'] ?? '');
-        $labelFields = array_filter(array_map('trim', explode('|', $labelRaw)));
+        $cfg         = self::resolveConfig(
+            (string) ($field['table'] ?? ''),
+            (string) ($field['value_field'] ?: 'id'),
+            (string) ($field['label_field'] ?? ''),
+            (string) ($field['display_fields'] ?? ''),
+            (string) ($field['filter'] ?? ''),
+            (string) ($field['order_by'] ?? ''),
+            (string) ($field['attributes'] ?? ''),
+        );
+        $table       = $cfg['table'];
+        $valueField  = $cfg['value_field'];
+        $labelFields = array_filter(array_map('trim', explode('|', $cfg['label_field'])));
 
         if ('' === $table || [] === $labelFields) {
             return rex_escape($ids[0]);

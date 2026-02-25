@@ -23,5 +23,6 @@ relation_select_yform_filter_notice = SQL-WHERE-Bedingung, z.B. status = 1
 relation_select_yform_order_by = Sortierung
 relation_select_yform_order_by_notice = Felder & Richtung kommasepariert, z.B. name, ASC oder name, ASC, prio, DESC
 relation_select_yform_multiple = Mehrfachauswahl
+relation_select_yform_attributes_notice = Bitte als JSON schreiben, z.B. {"readonly":"readonly"}. Enthält das JSON einen Key "data-relation-config", wird dessen Wert automatisch als Feldkonfiguration verwendet (Tabelle, Wertfeld usw.) – solange das Feld "Tabelle" oben leer ist. Hinweis: Vor dem Feldtypwechsel das JSON sichern, da es beim Speichern überschrieben werden kann.
 relation_select_search_empty_option = Bitte wählen …
 relation_select_list_records = Datensätze

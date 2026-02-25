@@ -1,5 +1,16 @@
 # Changelog
 
+## Version 1.4.1 (2026-02-25)
+
+### 🐛 Bugfixes
+- **`displayFields` mit Präfix-Syntax** (`badge:feldname`, `color:feldname`): API hat den Präfix direkt als SQL-Spaltennamen verwendet → 404-Fehler. Fix: Präfix wird vor dem `escapeIdentifier`-Aufruf entfernt (`badge:status` → `status`)
+- **Badges/Farben im YForm-Feldtyp nicht sichtbar**: Das YForm-Template hat `displayFields` gesetzt, aber `displayFormat` gefehlt → `formatLabel()` im JS hat nichts gerendert. Fix: Template setzt jetzt beide Keys identisch
+- **JS-Lookup `i['badge:status']` statt `i['status']`**: Bei der Suche nach vorhandenen Display-Items wurde der volle Wert inkl. Präfix als Feldname genutzt. Fix: Präfix wird jetzt auch im JS vor dem Lookup entfernt
+
+### ✨ Neue Features
+- **Legacy-Kompatibilität für konvertierte Felder**: Der neue YForm-Feldtyp liest bei leerem Feld `Tabelle` automatisch eine vorhandene `data-relation-config` aus dem Feld *Individuelle Attribute* (wie beim bisherigen Textfeld). Alle Parameternamen werden gemappt (`valueField`→`value_field`, `dbw`→`filter`, `dbob`→`order_by` usw.)
+- **`attributes`-Feld wie in `text.php`**: Der YForm-Feldtyp zeigt jetzt das Standard-YForm-Attribut-Feld mit erweiterter Notice, die auf den Fallback-Mechanismus und die Backup-Empfehlung vor dem Feldtypwechsel hinweist
+
 ## Version 1.4.0 (2026-02-24)
 
 ### ✨ Neue Features

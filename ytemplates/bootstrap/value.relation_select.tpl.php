@@ -43,6 +43,8 @@ $config = [
 ];
 if ('' !== $display_fields) {
     $config['displayFields'] = $display_fields;
+    // displayFormat nutzt dieselbe Syntax (badge:x|color:x) für das JS-Rendering
+    $config['displayFormat'] = $display_fields;
 }
 if ('' !== $filter) {
     $config['dbw'] = $filter;

@@ -344,7 +344,12 @@
                         // Prefer item with displayFields filled (e.g., art_color not null)
                         let item = items.find(i => {
                             const displayFields = config.displayFields ? config.displayFields.split('|') : [];
-                            return displayFields.some(field => i[field.trim()] != null && i[field.trim()] !== '');
+                            return displayFields.some(field => {
+                                // Präfix wie "badge:", "color:" entfernen
+                                const colonPos = field.indexOf(':');
+                                const fieldName = colonPos !== -1 ? field.substring(colonPos + 1).trim() : field.trim();
+                                return i[fieldName] != null && i[fieldName] !== '';
+                            });
                         }) || items[0];
                         
                         if (item) {

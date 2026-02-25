@@ -23,5 +23,6 @@ relation_select_yform_filter_notice = SQL WHERE condition, e.g. status = 1
 relation_select_yform_order_by = Sort order
 relation_select_yform_order_by_notice = Fields & direction comma-separated, e.g. name, ASC or name, ASC, prio, DESC
 relation_select_yform_multiple = Multiple selection
+relation_select_yform_attributes_notice = Write as JSON, e.g. {"readonly":"readonly"}. If the JSON contains a key "data-relation-config", its value is automatically used as field configuration (table, value field etc.) – as long as the "Table" field above is empty. Note: Back up the JSON before switching the field type, as it may be overwritten on save.
 relation_select_search_empty_option = Please select …
 relation_select_list_records = records

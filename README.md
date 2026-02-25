@@ -16,6 +16,7 @@ Ermöglicht die Auswahl und Sortierung verknüpfter Datensätze mit erweiterten 
 - 🏷️ Flexible Label-Gestaltung durch Feldverknüpfungen
 - 🔗 Unterstützung für Meta Infos und YForm
 - 📋 **Nativer YForm-Feldtyp** mit Tabellenmanager-Suche und Listendarstellung (ab 1.4.0)
+- 🔄 **Automatische Legacy-Kompatibilität**: Bestehende Text-Felder mit `data-relation-config` funktionieren nach Feldtypwechsel weiter (ab 1.4.1)
 
 ## Installation
 
@@ -92,7 +93,7 @@ Im YForm Table Manager unter **Felder > Hinzufügen** den Typ **`relation_select
 | Tabelle | Datenbankname der Quelltabelle | `rex_autoren` |
 | Wertfeld | Gespeichertes Feld (Standard: `id`) | `id` |
 | Anzeigefeld(er) | Label, mehrere mit `\|` trennen | `vorname\|nachname` |
-| Zusatzfelder (Display) | Farbe/Badge-Felder | `color:farbe\|badge:status` |
+| Zusatzfelder (Display) | Farbe/Badge-Felder, Präfix `badge:` oder `color:` | `color:farbe\|badge:status` |
 | WHERE-Filter | Einträge einschränken (entspricht `dbw`) | `status = 1` |
 | Sortierung | Sortierreihenfolge (entspricht `dbob`) | `name, ASC` |
 | Mehrfachauswahl | Mehrere IDs speicherbar | ✓ |
@@ -116,6 +117,10 @@ Die Einstellungen **WHERE-Filter** und **Sortierung** im YForm-Feldtyp entsprech
 **Suche im Tabellenmanager:** Wenn das Feld als durchsuchbar markiert ist, erscheint in der Suche automatisch ein Dropdown mit allen Einträgen der Quelltabelle (Einzelauswahl). Der WHERE-Filter aus der Feldkonfiguration wird dabei berücksichtigt.
 
 **Listendarstellung:** Bei einem ausgewählten Datensatz wird dessen Label angezeigt. Bei mehreren Datensätzen erscheint ein Badge mit der Anzahl (z. B. `5 Datensätze`).
+
+**Kompatibilität mit bestehenden Text-Feldern:** Wer das Widget bisher als YForm-**Textfeld** mit `data-relation-config` in den *Individuellen Attributen* eingesetzt hat, kann das Feld direkt auf den Typ `relation_select` umstellen. So lange das Feld **Tabelle** leer bleibt, liest das AddOn die Konfiguration automatisch aus dem Attribut-JSON weiter. Sobald **Tabelle** ausgefüllt wird, gelten die neuen Felder.
+
+> **Vor dem Feldtypwechsel:** Das JSON aus dem Feld *Individuelle Attribute* zwischenspeichern! Beim Speichern des Feldes im YForm-Manager kann der bisherige Inhalt überschrieben werden. Die benötigten Werte sind danach im JSON sichtbar und können manuell in die Felder Tabelle, Wertfeld, Anzeigefeld usw. übertragen werden.
 
 ---
 

@@ -60,12 +60,20 @@ class RelationSelect extends rex_api_function
         $labelExpr = 'CONCAT(' . implode(", ' ', ", $labelExpr) . ') as label';
 
         // Parse display fields for additional data (color, status, etc.)
+        // Format: "color:feldname|badge:feldname|reinesfeld" – Präfix vor ":" wird entfernt
         $additionalFields = [];
         if ('' !== $displayFields) {
             $displayFieldsList = array_map('trim', explode('|', $displayFields));
             foreach ($displayFieldsList as $displayField) {
-                if ('' !== $displayField) {
-                    $additionalFields[] = $sql->escapeIdentifier($displayField);
+                if ('' === $displayField) {
+                    continue;
+                }
+                // Präfix wie "badge:", "color:" etc. entfernen → nur den Feldnamen verwenden
+                $colonPos = strpos($displayField, ':');
+                $fieldName = false !== $colonPos ? substr($displayField, $colonPos + 1) : $displayField;
+                $fieldName = trim($fieldName);
+                if ('' !== $fieldName) {
+                    $additionalFields[] = $sql->escapeIdentifier($fieldName);
                 }
             }
         }
