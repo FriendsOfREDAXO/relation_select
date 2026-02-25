@@ -1,5 +1,7 @@
 # Relation Select AddOn
 
+![Screenshot](https://raw.githubusercontent.com/FriendsOfREDAXO/relation_select/assets/screen.png)
+
 Ermöglicht die Auswahl und Sortierung verknüpfter Datensätze mit erweiterten Filter- und Sortiermöglichkeiten.
 
 ## Features
