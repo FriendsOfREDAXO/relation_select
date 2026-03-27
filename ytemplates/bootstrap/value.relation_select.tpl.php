@@ -53,7 +53,12 @@ if ('' !== $order_by) {
     $config['dbob'] = $order_by;
 }
 
-$mode     = $multiple ? 'inline' : 'inline';
+$attributes = json_decode((string) $this->getElement('attributes'), true);
+if (!is_array($attributes)) {
+    $attributes = [];
+}
+$relationMode = $attributes['data-relation-mode'] ?? ($multiple ? 'inline' : 'inline-single');
+
 $inputId  = $this->getFieldId();
 $inputName = $this->getFieldName();
 $currentValue = (string) $this->getValue();
@@ -66,7 +71,7 @@ $currentValue = (string) $this->getValue();
         name="<?= rex_escape($inputName) ?>"
         value="<?= rex_escape($currentValue) ?>"
         data-relation-config="<?= rex_escape(json_encode($config)) ?>"
-        data-relation-mode="<?= $multiple ? 'inline' : 'inline-single' ?>"
+        data-relation-mode="<?= rex_escape($relationMode) ?>"
     >
     <?= $noticeHtml ?>
 </div>

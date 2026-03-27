@@ -437,10 +437,11 @@ body.rex-theme-dark .relation-id,
     padding: 8px 16px;
 }
 
-/* Prevent body scroll when modal is open */
+/* Prevent body scroll when modal is open - removed due to scroll jump issue in REDAXO backend
 body.relation-select-modal-open {
     overflow: hidden;
 }
+*/
 
 /* Mobile modal adjustments */
 @media (max-width: 768px) {

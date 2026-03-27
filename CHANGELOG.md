@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 1.4.2 (2026-03-27)
+
+### 🐛 Bugfixes
+- **Modal-Ansicht Scroll-Sprung**: Wenn sich das Backend-Modal öffnet, sprang die Ansicht des Formulars im Hintergrund ganz nach oben (durch global gesetztes `overflow: hidden` auf den Body). Dieses Verhalten wurde deaktiviert.
+- **`data-relation-mode` in Template berücksichtigt**: Das hartcodierte `inline`-Verhalten im YForm Bootstrap-Template (value.relation_select.tpl.php) wurde korrigiert, sodass im Tabllenmanager angegebene individuelle YForm-Attribute (wie `{"data-relation-mode":"modal"}`) ab jetzt korrekt angewendet werden.
+
 ## Version 1.4.1 (2026-02-25)
 
 ### 🐛 Bugfixes
