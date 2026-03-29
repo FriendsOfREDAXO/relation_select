@@ -48,13 +48,23 @@ class RelationSelect extends rex_api_function
 
         $sql = rex_sql::factory();
 
-        // Determine clang ID for lang: prefix support
-        // YForm lang_text stores: [{"clang_id": 1, "value": "..."}, {"clang_id": 2, "value": "..."}]
+        // Resolve language for lang: prefix support
+        // Two formats exist in REDAXO:
+        //   ARRAY format (YForm lang_text):  [{"clang_id": 1, "value": "..."}, ...]
+        //   OBJECT format (older addons):     {"de": "...", "nl": "..."}
         $clangId = $clang > 0 ? $clang : rex_clang::getCurrentId();
-        $clangId = (int) $clangId; // ensure safe for SQL
+        $clangId = (int) $clangId;
+
+        $langCode = 'de';
+        $clangObj = rex_clang::get($clangId);
+        if ($clangObj) {
+            $langCode = preg_replace('/[^a-z]/', '', strtolower($clangObj->getCode()));
+        }
 
         // Parse label fields
-        // lang:fieldname → extracts YForm lang_text value via JSON_TABLE (array format)
+        // lang:fieldname → auto-detects JSON format per CASE JSON_TYPE():
+        //   ARRAY  → [{"clang_id":N,"value":"..."}] (YForm lang_text type)
+        //   OBJECT → {"de":"..."} (legacy/custom multi-lang objects)
         // plain fieldname → used as-is (BC)
         $fields = array_map('trim', explode('|', $labelField));
         $labelExpr = [];
@@ -65,14 +75,19 @@ class RelationSelect extends rex_api_function
             }
             if (str_starts_with($field, 'lang:')) {
                 $realField = substr($field, 5);
-                $escapedField = $sql->escapeIdentifier($realField);
-                // YForm lang_text format: [{"clang_id": N, "value": "..."}]
-                // Use JSON_TABLE subquery to extract value for the specific clang_id,
-                // fall back to first array entry, then raw field
+                $ef = $sql->escapeIdentifier($realField);
+                $clangIdSql = (string) $clangId;   // already cast to int – safe
+                $langCodeSql = "'" . $langCode . "'"; // already sanitized with preg_replace
+                // ARRAY: JSON_SEARCH finds the path to the matching clang_id entry,
+                //        REPLACE swaps 'clang_id' → 'value' in the path, JSON_UNQUOTE
+                //        strips outer quotes so JSON_EXTRACT gets a clean path.
+                // OBJECT: plain key lookup by language code.
                 $labelExpr[] = 'COALESCE('
-                    . '(SELECT jt.val FROM JSON_TABLE(' . $escapedField . ', \'$[*]\' COLUMNS(cid INT PATH \'$.clang_id\', val TEXT PATH \'$.value\')) jt WHERE jt.cid = ' . $clangId . ' LIMIT 1), '
-                    . 'JSON_UNQUOTE(JSON_EXTRACT(' . $escapedField . ', \'$[0].value\')), '
-                    . $escapedField
+                    . 'CASE JSON_TYPE(' . $ef . ') '
+                    . "WHEN 'ARRAY' THEN JSON_UNQUOTE(JSON_EXTRACT(" . $ef . ', JSON_UNQUOTE(REPLACE(JSON_SEARCH(' . $ef . ", 'one', " . $clangIdSql . ", NULL, '\$[*].clang_id'), 'clang_id', 'value')))) "
+                    . "WHEN 'OBJECT' THEN JSON_UNQUOTE(JSON_EXTRACT(" . $ef . ", '\$." . $langCode . "')) "
+                    . 'ELSE NULL END, '
+                    . $ef
                     . ')';
             } else {
                 $labelExpr[] = $sql->escapeIdentifier($field);
