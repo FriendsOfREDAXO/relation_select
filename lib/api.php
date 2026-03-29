@@ -47,12 +47,38 @@ class RelationSelect extends rex_api_function
 
         $sql = rex_sql::factory();
 
+        // Resolve language code for lang: prefix support
+        $langCode = 'de';
+        if ($clang > 0) {
+            $clangObj = rex_clang::get($clang);
+            if ($clangObj) {
+                $langCode = $clangObj->getCode();
+            }
+        } elseif (rex_clang::getCurrentId() > 0) {
+            $langCode = rex_clang::getCurrent()->getCode();
+        }
+        $langCode = preg_replace('/[^a-z]/', '', strtolower($langCode)); // sanitize
+
         // Parse label fields
+        // lang:fieldname → extracts JSON lang_text value via JSON_UNQUOTE/JSON_EXTRACT
+        // plain fieldname → used as-is (BC)
         $fields = array_map('trim', explode('|', $labelField));
         $labelExpr = [];
 
         foreach ($fields as $field) {
-            if ('' !== $field) {
+            if ('' === $field) {
+                continue;
+            }
+            if (str_starts_with($field, 'lang:')) {
+                $realField = substr($field, 5);
+                $escapedField = $sql->escapeIdentifier($realField);
+                // Extract language-specific value; fall back to first available value, then raw field
+                $labelExpr[] = 'COALESCE('
+                    . 'NULLIF(JSON_UNQUOTE(JSON_EXTRACT(' . $escapedField . ', \'$."' . $langCode . '"\')), \'null\'), '
+                    . 'JSON_UNQUOTE(JSON_EXTRACT(' . $escapedField . ', \'$.*\')), '
+                    . $escapedField
+                    . ')';
+            } else {
                 $labelExpr[] = $sql->escapeIdentifier($field);
             }
         }
