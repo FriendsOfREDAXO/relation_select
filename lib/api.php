@@ -48,20 +48,13 @@ class RelationSelect extends rex_api_function
 
         $sql = rex_sql::factory();
 
-        // Resolve language code for lang: prefix support
-        $langCode = 'de';
-        if ($clang > 0) {
-            $clangObj = rex_clang::get($clang);
-            if ($clangObj) {
-                $langCode = $clangObj->getCode();
-            }
-        } elseif (rex_clang::getCurrentId() > 0) {
-            $langCode = rex_clang::getCurrent()->getCode();
-        }
-        $langCode = preg_replace('/[^a-z]/', '', strtolower($langCode)); // sanitize
+        // Determine clang ID for lang: prefix support
+        // YForm lang_text stores: [{"clang_id": 1, "value": "..."}, {"clang_id": 2, "value": "..."}]
+        $clangId = $clang > 0 ? $clang : rex_clang::getCurrentId();
+        $clangId = (int) $clangId; // ensure safe for SQL
 
         // Parse label fields
-        // lang:fieldname → extracts JSON lang_text value via JSON_UNQUOTE/JSON_EXTRACT
+        // lang:fieldname → extracts YForm lang_text value via JSON_TABLE (array format)
         // plain fieldname → used as-is (BC)
         $fields = array_map('trim', explode('|', $labelField));
         $labelExpr = [];
@@ -73,10 +66,12 @@ class RelationSelect extends rex_api_function
             if (str_starts_with($field, 'lang:')) {
                 $realField = substr($field, 5);
                 $escapedField = $sql->escapeIdentifier($realField);
-                // Extract language-specific value; fall back to first available value, then raw field
+                // YForm lang_text format: [{"clang_id": N, "value": "..."}]
+                // Use JSON_TABLE subquery to extract value for the specific clang_id,
+                // fall back to first array entry, then raw field
                 $labelExpr[] = 'COALESCE('
-                    . 'NULLIF(JSON_UNQUOTE(JSON_EXTRACT(' . $escapedField . ', \'$."' . $langCode . '"\')), \'null\'), '
-                    . 'JSON_UNQUOTE(JSON_EXTRACT(' . $escapedField . ', \'$.*\')), '
+                    . '(SELECT jt.val FROM JSON_TABLE(' . $escapedField . ', \'$[*]\' COLUMNS(cid INT PATH \'$.clang_id\', val TEXT PATH \'$.value\')) jt WHERE jt.cid = ' . $clangId . ' LIMIT 1), '
+                    . 'JSON_UNQUOTE(JSON_EXTRACT(' . $escapedField . ', \'$[0].value\')), '
                     . $escapedField
                     . ')';
             } else {
