@@ -1,5 +1,18 @@
 # Changelog
 
+## Version 1.5.0 (2026-03-29)
+
+### ✨ Neue Features
+- **Mehrsprachige Felder (`lang:` Präfix)**: Display-Felder können mit `lang:feldname` angegeben werden, um automatisch den Wert in der aktuellen Sprache aus YForm `lang_text`-Feldern zu extrahieren
+  - Unterstützt beide JSON-Formate: Array-Format `[{"clang_id":1, "value":"..."}]` (YForm) und Object-Format `{"de":"..."}` (Legacy)
+  - Extraktion erfolgt per `JSON_TABLE` (Array) bzw. `JSON_UNQUOTE/JSON_EXTRACT` (Object) direkt in SQL
+  - Fallback auf erstes verfügbares Array-Element wenn die aktuelle Sprache nicht gefunden wird
+
+### 🐛 Bugfixes
+- **`json_table` für YForm `lang_text` Array-Format**: Der bisherige `JSON_UNQUOTE/JSON_EXTRACT`-Ansatz mit `$.de` hat immer den rohen JSON-String zurückgegeben. Korrigiert auf `JSON_TABLE`-Subquery mit Fallback
+- **Namespace-Fehler `rex_clang`**: Fehlendes `use`-Statement in der API ergänzt
+- **Format-Erkennung**: `lang:` Präfix erkennt jetzt zuverlässig beide JSON-Formate und wählt automatisch die passende Extraktionsstrategie
+
 ## Version 1.4.2 (2026-03-27)
 
 ### 🐛 Bugfixes
