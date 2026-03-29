@@ -6,6 +6,7 @@ use rex_api_exception;
 use rex_api_function;
 use rex_api_result;
 use rex_backend_login;
+use rex_clang;
 use rex_config;
 use rex_response;
 use rex_sql;
